@@ -32,3 +32,4 @@ The webpage consists of the following sections:
     ├── github-mark-white.png # GitHub logo used in resources │ 
     ├── mark-gradient-white-jira.png # Jira logo used in resources  │ 
     └── nathalie.jpg # Image of Nathalie
+
