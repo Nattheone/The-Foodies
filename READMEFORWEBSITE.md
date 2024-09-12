@@ -35,16 +35,5 @@ The webpage consists of the following sections:
      ├──  mark-gradient-white-jira.png # Jira logo used in resources
      └── nathalie.jpg               # Image of Nathalie
      
-
-  .
-  ├── index.html  
-  ├── style.css 
-  ├── script.js 
-  ├── READMEFORWEBSITE.md 
-  ├── /pictures/ 
-    ├──  │ 
-    ├── │ 
-    ├──  │ 
-    └── 
     
 
