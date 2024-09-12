@@ -21,15 +21,27 @@ The webpage consists of the following sections:
 - **Meeting and Scheduling**: An embedded calendar for tracking project meetings.
 - **Resources and Documentation**: Links to external documentation and resources.
 
+
+### A typical top-level directory layout
+
+    .
+    ├── build                   # Compiled files (alternatively `dist`)
+    ├── docs                    # Documentation files (alternatively `doc`)
+    ├── src                     # Source files (alternatively `lib` or `app`)
+    ├── test                    # Automated tests (alternatively `spec` or `tests`)
+    ├── tools                   # Tools and utilities
+    ├── LICENSE
+    └── README.md
 ### File Structure
 .
-. ├── index.html # Main HTML file for the webpage 
-  ├── style.css # CSS for styling the webpage  
-  ├── script.js # JavaScript 
-  ├── READMEFORWEBSITE.md # This README file 
-  ├── /pictures/ # Folder containing images for the webpage │ 
-    ├── alexis.jpg # Image of Alexis │ 
-    ├── github-mark-white.png # GitHub logo used in resources │ 
-    ├── mark-gradient-white-jira.png # Jira logo used in resources  │ 
-    └── nathalie.jpg # Image of Nathalie
+├── index.html # Main HTML file for the webpage 
+├── style.css # CSS for styling the webpage  
+├── script.js # JavaScript 
+├── READMEFORWEBSITE.md # This README file 
+├── /pictures/ # Folder containing images for the webpage │ 
+  ├── alexis.jpg # Image of Alexis │ 
+  ├── github-mark-white.png # GitHub logo used in resources │ 
+  ├── mark-gradient-white-jira.png # Jira logo used in resources  │ 
+  └── nathalie.jpg # Image of Nathalie
+  
 
