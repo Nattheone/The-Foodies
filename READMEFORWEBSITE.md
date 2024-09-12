@@ -22,7 +22,7 @@ The webpage consists of the following sections:
 - **Resources and Documentation**: Links to external documentation and resources.
 
 ### File Structure
-
+.
 . ├── index.html # Main HTML file for the webpage 
   ├── style.css # CSS for styling the webpage  
   ├── script.js # JavaScript 
