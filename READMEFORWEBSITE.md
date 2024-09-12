@@ -25,23 +25,26 @@ The webpage consists of the following sections:
 ### A typical top-level directory layout
 
     .
-    ├── build                   # Compiled files (alternatively `dist`)
-    ├── docs                    # Documentation files (alternatively `doc`)
-    ├── src                     # Source files (alternatively `lib` or `app`)
-    ├── test                    # Automated tests (alternatively `spec` or `tests`)
-    ├── tools                   # Tools and utilities
-    ├── LICENSE
-    └── README.md
+    ├── index.html                   # Main HTML file for the webpage
+    ├── style.css                    # CSS for styling the webpage  
+    ├── script.js                    # JavaScript 
+    ├── READMEFORWEBSITE.md          # This README file 
+    ├── /pictures/                   # Folder containing images for the webpage 
+     ├── alexis.jpg                  # Image of Alexis
+     ├──  github-mark-white.png      # GitHub logo used in resources
+     ├──  mark-gradient-white-jira.png # Jira logo used in resources
+     └── nathalie.jpg               # Image of Nathalie
+     
 ### File Structure
-.
-├── index.html # Main HTML file for the webpage 
-├── style.css # CSS for styling the webpage  
-├── script.js # JavaScript 
-├── READMEFORWEBSITE.md # This README file 
-├── /pictures/ # Folder containing images for the webpage │ 
-  ├── alexis.jpg # Image of Alexis │ 
-  ├── github-mark-white.png # GitHub logo used in resources │ 
-  ├── mark-gradient-white-jira.png # Jira logo used in resources  │ 
-  └── nathalie.jpg # Image of Nathalie
-  
+  .
+  ├── index.html  
+  ├── style.css 
+  ├── script.js 
+  ├── READMEFORWEBSITE.md 
+  ├── /pictures/ 
+    ├──  │ 
+    ├── │ 
+    ├──  │ 
+    └── 
+    
 
