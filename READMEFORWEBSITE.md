@@ -22,7 +22,7 @@ The webpage consists of the following sections:
 - **Resources and Documentation**: Links to external documentation and resources.
 
 
-### A typical top-level directory layout
+## File Structure
 
     .
     ├── index.html                   # Main HTML file for the webpage
@@ -35,7 +35,7 @@ The webpage consists of the following sections:
      ├──  mark-gradient-white-jira.png # Jira logo used in resources
      └── nathalie.jpg               # Image of Nathalie
      
-### File Structure
+
   .
   ├── index.html  
   ├── style.css 
