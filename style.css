@@ -70,7 +70,7 @@ header{
 }
 
 /*MEETING AND CALENDAR STYLING*/
-#Meeting_Scheduling {
+#Meeting_Scheduling, #Stage1 {
 	background-color: #a5a58d; 
 	padding: 20px;
 }
@@ -116,7 +116,7 @@ footer {
  overflow: visible;
 
 }
- .link{
+ .link, .File{
 
  width: 100%;
  max-width: 190px;
@@ -130,7 +130,24 @@ footer {
  overflow: visible;
 
 }
-#Team_Members{
+ .File{
+
+ width: 100%;
+ max-width: 190px;
+ height: 80px;
+ border-radius: 20px;
+ background: #ffffff;
+ position: relative;
+ padding: 1.8rem;
+ border: 2px solid #a5a58d;
+ transition: 0.5s ease-out;
+ overflow: visible;
+	 display: flex;
+	 justify-content: center;  
+	 align-items: center;      
+
+}
+#Team_Members, #Files{
 	display: flex;
 	justify-content: center;
 	gap: 20px;
@@ -138,7 +155,7 @@ footer {
 	font-size: 12px;
 }
 
-#Resources{
+#Resources, #Files{
 	display: flex;
 	gap: 10px;
 	align-items: center;
@@ -188,4 +205,50 @@ footer {
 	object-fit: cover; 
 	margin-bottom: 10px; 
 
+}
+.button {
+	border: none;
+	display: flex;
+	padding: 0.75rem 1.5rem;
+	background-color: #6b705c;
+	color: #ffffff;
+	font-size: 0.75rem;
+	line-height: 1rem;
+	font-weight: 700;
+	text-align: center;
+	cursor: pointer;
+	text-transform: uppercase;
+	vertical-align: center;
+	align-items: center;
+	border-radius: 0.5rem;
+	user-select: none;
+	gap: 0.75rem;
+	box-shadow:
+		0 4px 6px -1px #488aec31,
+		0 2px 4px -1px #488aec17;
+	transition: all 0.6s ease;
+}
+
+button:hover {
+	box-shadow:
+		0 10px 15px -3px #488aec4f,
+		0 4px 6px -2px #488aec17;
+}
+
+button:focus,
+button:active {
+	opacity: 0.85;
+	box-shadow: none;
+}
+
+button svg {
+	width: 1.25rem;
+	height: 1.25rem;
+}
+.button_container{
+	display: flex;
+	justify-content: center;  /* Horizontally centers the button */
+	align-items: center;      /* Vertically centers the button, optional */
+	width: 100%;              /* Ensures the container takes full width */
+	padding: 20px;   
 }
