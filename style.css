@@ -70,7 +70,7 @@ header{
 }
 
 /*MEETING AND CALENDAR STYLING*/
-#Meeting_Scheduling, #Stage1 {
+#Meeting_Scheduling, #Stage1, #Stage2 {
 	background-color: #a5a58d; 
 	padding: 20px;
 }
