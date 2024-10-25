@@ -8,7 +8,8 @@
     "scheme": "yourappscheme",  
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.company.appname"
+      "bundleIdentifier": "com.company.appname",
+      "googleServicesFile":"./GoogleService-Info.plist"
 
     },
     "android": {
@@ -19,6 +20,7 @@
     },
     "plugins": [
       "expo-router"
+      
     ],
     "experiments": {
       "typedRoutes": true
