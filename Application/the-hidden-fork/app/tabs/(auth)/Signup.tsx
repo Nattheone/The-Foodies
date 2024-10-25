@@ -34,7 +34,6 @@ export default function Signup() {
     }
 
     try {
-      // Firebase signup
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       alert('Sign up successful!');
       router.push('../auth/Login'); // Navigate to login after sign-up
