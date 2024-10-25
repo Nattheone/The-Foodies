@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../firebaseConfig'; // Import your Firebase config
+import { auth } from '../../../firebaseConfig'; // Import your Firebase config
 
 export default function Signup() {
   const router = useRouter();

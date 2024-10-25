@@ -37,7 +37,7 @@ export default function GetStarted() {
 
           <TouchableOpacity
             style={styles.button}
-            onPress={() => router.push('../Login')}
+            onPress={() => router.push('/tabs/(auth)/Login')}
           >
             <Text style={styles.buttonText}>LOGIN</Text>
           </TouchableOpacity>

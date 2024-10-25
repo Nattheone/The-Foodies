@@ -8,9 +8,7 @@
     "scheme": "yourappscheme",  
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.company.appname",
-      "googleServicesFile":"./GoogleService-Info.plist"
-
+      "bundleIdentifier": "com.company.appname"
     },
     "android": {
       "adaptiveIcon": {
