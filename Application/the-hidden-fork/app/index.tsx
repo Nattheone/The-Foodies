@@ -1,33 +1,29 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet, ImageBackground } from 'react-native';
+import { View, Text, Button, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import backgroundImage from '../assets/unsplash_B-DrrO3tSbo.png';
 
-export default function Index() {
+export default function GetStarted() {
   const router = useRouter();
 
   return (
-    <ImageBackground
-      source={require('./app/assets/unsplash_B-DrrO3tSbo.png')} 
-      style={styles.background}
-    >
+    <View style={styles.background}>  {/* View with green background */}
       <View style={styles.container}>
         <Text style={styles.title}>DISCOVER & ENJOY</Text>
 
         <View style={styles.buttonContainer}>
           <Button
             title="SIGN UP"
-            color="#6A7E61" // Customize the button color
-            onPress={() => router.push('./auth/SignUp')} // Navigate to Sign Up screen
+            color="#6A7E61"  // Button color
+            onPress={() => router.push('./auth/SignUp')}  // Navigate to Sign Up screen
           />
           <Button
             title="LOGIN"
-            color="#6A7E61" // Customize the button color
-            onPress={() => router.push('./auth/Login')} // Navigate to Login screen
+            color="#6A7E61"  // Button color
+            onPress={() => router.push('./auth/Login')}  // Navigate to Login screen
           />
         </View>
       </View>
-    </ImageBackground>
+    </View>
   );
 }
 
@@ -36,6 +32,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'green',  // Set green background
   },
   container: {
     flex: 1,
