@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';  // Importing the expo-image component
+import { Color, Border, FontFamily, Padding, FontSize } from "../style/GlobalStyles";
 
 export default function GetStarted() {
   const router = useRouter();
@@ -26,6 +27,7 @@ export default function GetStarted() {
           <Button
             title="LOGIN"
             color="#6A7E61"
+            
             onPress={() => router.push('/auth/Login')}  // Navigate to Login screen
           />
         </View>
