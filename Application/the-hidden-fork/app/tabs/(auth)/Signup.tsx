@@ -54,10 +54,11 @@ export default function Signup() {
       keyboardVerticalOffset={80}
     >
       <View style={styles.innerContainer}>
-        {/* Add SVG Image */}
-        <Image
-          source={require('../../../assets/green_fork.svg')} // Replace with the correct path to green_fork.svg or .png
-          style={styles.logo}
+        {/* Display the PNG Image with resizeMode */}
+        <Image 
+          source={require('../../../assets/fork_green.png')} // Assuming this is your image path
+          style={styles.logo} 
+          resizeMode="contain"  // Adjust resizeMode as needed ('cover', 'stretch', etc.)
         />
 
         <Text style={styles.title}>Sign Up</Text>
@@ -119,8 +120,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F8F8',
   },
   logo: {
-    width: 100, // Adjust as needed
-    height: 100, // Adjust as needed
+    width: 80,  // Adjust width as needed
+    height: 80, // Adjust height as needed
     marginBottom: 20,
   },
   title: {

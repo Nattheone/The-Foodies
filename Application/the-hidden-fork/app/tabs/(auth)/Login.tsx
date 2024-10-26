@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import { signInWithEmailAndPassword, getAuth } from 'firebase/auth';
 import { useRouter } from 'expo-router';
@@ -20,17 +21,24 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  async function registerAndLogin() {
+  async function handleLogin() {
+    if (!email || !password) {
+      Alert.alert('Validation Error', 'Please fill all fields.');
+      return;
+    }
+
     setLoading(true);
+    const auth = getAuth(app);
+
     try {
-      const auth = getAuth(app);
       await signInWithEmailAndPassword(auth, email, password);
+      Alert.alert('Success', 'Login successful!', [
+        { text: 'Okay', onPress: () => router.push('/tabs/(auth)/Signup') },
+      ]);
+    } catch (error: any) {
+      Alert.alert('Something went wrong', error.message);
+    } finally {
       setLoading(false);
-      
-      // Replace the current screen with "choose image"
-          router.push('/tabs/GetStarted')    } catch (error: any) {
-      setLoading(false);
-      Alert.alert('Oops', error.message);
     }
   }
 
@@ -41,6 +49,13 @@ export default function Login() {
       keyboardVerticalOffset={80}
     >
       <View style={styles.innerContainer}>
+        {/* Display the PNG Image with resizeMode */}
+        <Image
+          source={require('../../../assets/fork_green.png')} // Adjust the path if needed
+          style={styles.logo}
+          resizeMode="contain"
+        />
+
         <Text style={styles.title}>Login</Text>
 
         <TextInput
@@ -59,7 +74,7 @@ export default function Login() {
           secureTextEntry
         />
 
-        <TouchableOpacity style={styles.button} onPress={registerAndLogin}>
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
           {loading ? (
             <ActivityIndicator size="small" color="white" />
           ) : (
@@ -84,34 +99,38 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F8F8', // Light background color from the palette
   },
   innerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
-    backgroundColor: '#F8F8F8', // Same background as container
+    backgroundColor: '#F8F8F8',
+  },
+  logo: {
+    width: 80, // Adjust width as needed
+    height: 80, // Adjust height as needed
+    marginBottom: 20,
   },
   title: {
     fontSize: 30,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#4A4A4A', // Darker gray for title text
+    color: '#4A4A4A',
   },
   input: {
     width: '90%',
     height: 45,
     borderRadius: 6,
     paddingHorizontal: 10,
-    backgroundColor: '#E5E5E5', // Slightly lighter gray for input background
+    backgroundColor: '#E5E5E5',
     alignSelf: 'center',
-    color: '#4A4A4A', // Darker gray text inside input
+    color: '#4A4A4A',
   },
   button: {
     width: '90%',
     height: 45,
-    backgroundColor: '#5A6B5C', // Dark green for button background
+    backgroundColor: '#5A6B5C',
     borderRadius: 6,
     marginTop: 25,
     alignSelf: 'center',
@@ -119,7 +138,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonText: {
-    color: '#F8F8F8', // Light text on the dark green button
+    color: '#F8F8F8',
     fontSize: 16,
   },
   register: {
@@ -130,6 +149,6 @@ const styles = StyleSheet.create({
   },
   link: {
     fontSize: 15,
-    color: '#798B67', // Olive green for link text
+    color: '#798B67',
   },
 });
