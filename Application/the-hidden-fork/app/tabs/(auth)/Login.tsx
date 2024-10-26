@@ -86,7 +86,7 @@ export default function Login() {
           <Text style={styles.link}>Don't have an account? </Text>
           <Text
             style={[styles.link, { color: '#5A6B5C' }]}
-            onPress={() => router.push('/tabs/(auth)/loggedin/InitalSignUpLoading')}
+            onPress={() => router.push('/tabs/(auth)/Signup')}
           >
             Sign up
           </Text>
