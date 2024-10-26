@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
@@ -13,10 +13,8 @@ export default function CustomerProfile() {
   const user = auth.currentUser;
 
   const [name, setName] = useState('');
-  const [contactInfo, setContactInfo] = useState('');
-  const [bio, setBio] = useState('');
+  const [reviewCount, setReviewCount] = useState(0); // Placeholder for review count
   const [loading, setLoading] = useState(true);
-  const [isOwner, setIsOwner] = useState(false); // State to track if the user owns this profile
 
   useEffect(() => {
     if (user) {
@@ -30,11 +28,7 @@ export default function CustomerProfile() {
       if (profileDoc.exists()) {
         const data = profileDoc.data();
         setName(data.name || 'No name set');
-        setContactInfo(data.contactInfo || 'No contact info set');
-        setBio(data.bio || 'No bio set');
-        
-        // Check if the logged-in user is the owner of this profile
-        setIsOwner(userId === user?.uid);
+        setReviewCount(data.reviewCount || 0); // Assume Firestore has a `reviewCount` field
       }
     } catch (error) {
       console.error('Error loading profile data:', error);
@@ -55,74 +49,109 @@ export default function CustomerProfile() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Your Profile</Text>
+      <View style={styles.header}>
+        {/* Circle Profile Picture Placeholder */}
+        <View style={styles.profilePicturePlaceholder} /> 
 
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Name:</Text>
-        <Text style={styles.infoText}>{name}</Text>
-      </View>
+        <Text style={styles.name}>{name}</Text>
 
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Contact Info:</Text>
-        <Text style={styles.infoText}>{contactInfo}</Text>
-      </View>
+        {/* Following Count */}
+        <View style={styles.followingContainer}>
+          <Text style={styles.followingCount}>{1}</Text>
+          <Text style={styles.followingLabel}>Following</Text>
+        </View>
 
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Bio:</Text>
-        <Text style={styles.infoText}>{bio}</Text>
-      </View>
-
-      {isOwner && (
-        <TouchableOpacity style={styles.button} onPress={() => router.push('/tabs/(auth)/loggedin/Customer/CustomerSetting')}>
-          <Text style={styles.buttonText}>Edit Profile</Text>
+        {/* Edit Button */}
+        <TouchableOpacity 
+          onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/CustomerSetting')} 
+          style={styles.editButton}
+        >
+          <Text style={styles.editText}>Edit</Text> 
         </TouchableOpacity>
-      )}
+      </View>
+
+      {/* ... (rest of your code remains the same) */}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    backgroundColor: '#F8F8F8',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#4A4A4A',
-    marginBottom: 20,
-  },
-  infoContainer: {
-    width: '100%',
-    marginBottom: 15,
-    padding: 10,
-    backgroundColor: '#E5E5E5',
-    borderRadius: 6,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#4A4A4A',
-  },
-  infoText: {
-    fontSize: 16,
-    color: '#4A4A4A',
-  },
-  button: {
-    width: '90%',
-    paddingVertical: 15,
-    backgroundColor: '#5A6B5C',
-    borderRadius: 6,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  buttonText: {
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: '#F8F8F8',
+    },
+    header: {
+      backgroundColor: '#798B67',
+      alignItems: 'center',
+      borderBottomLeftRadius: 20,
+      borderBottomRightRadius: 20,
+      paddingBottom: 30, // Adjusted padding
+    },
+    profilePicture: {
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+      borderWidth: 3,
+      borderColor: '#fff',
+      marginTop: 50, // Adjusted margin
+    },
+    profilePicturePlaceholder: {
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+      borderWidth: 3,
+      borderColor: '#fff',
+      marginTop: 50,
+      backgroundColor: '#ccc', // Placeholder background
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    name: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: '#FFFFFF',
+      marginTop: 10,
+    },
+    followingContainer: {
+      alignItems: 'center',
+      marginTop: 10,
+    },
+    followingCount: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: '#FFFFFF',
+    },
+    followingLabel: {
+      fontSize: 16,
+      color: '#FFFFFF',
+    },
+    editButton: {
+      position: 'absolute',
+      top: 40,
+      right: 20,
+    },
+  editText: {
     color: '#FFFFFF',
     fontSize: 18,
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginVertical: 20,
+  },
+  statBox: {
+    alignItems: 'center',
+    marginHorizontal: 15,
+  },
+  statNumber: {
+    fontSize: 20,
     fontWeight: 'bold',
+    color: '#4A4A4A',
+  },
+  statLabel: {
+    fontSize: 16,
+    color: '#4A4A4A',
   },
   loadingText: {
     marginTop: 20,

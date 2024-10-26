@@ -26,14 +26,14 @@ export default function InitialSignUpLoading() {
       // Check if user is in the 'customers' collection
       const customerDoc = await getDoc(doc(firestore, 'customers', userId));
       if (customerDoc.exists()) {
-         router.replace('/'); // Navigate to customer profile setup
+         router.replace('/tabs/(auth)/loggedin/Profiles/CustomerProfile'); // Navigate to customer profile setup
         return;
       }
 
       // Check if user is in the 'restaurants' collection
       const restaurantDoc = await getDoc(doc(firestore, 'restaurants', userId));
       if (restaurantDoc.exists()) {
-        // router.replace('/tabs/RestaurantProfile'); // Navigate to restaurant profile setup
+        router.replace('/tabs/(auth)/loggedin/Profiles/RestaurantProfile'); // Navigate to restaurant profile setup
         return;
       }
 
