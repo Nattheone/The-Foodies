@@ -1,37 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { getAuth, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import * as ImagePicker from 'expo-image-picker';
 import { app } from '../../../../../firebaseConfig';
 
 const firestore = getFirestore(app);
+const storage = getStorage(app);
 
 export default function CustomerSetting() {
   const router = useRouter();
   const auth = getAuth(app);
   const user = auth.currentUser;
 
-  const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [name, setName] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [currentPassword, setCurrentPassword] = useState<string>('');
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (user) {
       loadProfileData(user.uid);
     } else {
       Alert.alert("Error", "User is not logged in.");
-      router.replace("/tabs/Login"); // Redirect to login if user is not logged in
+      router.replace("/tabs/Login");
     }
   }, [user]);
 
-  async function loadProfileData(userId: string) {
+  async function loadProfileData(userId: string): Promise<void> {
     try {
       const profileDoc = await getDoc(doc(firestore, 'customers', userId));
       if (profileDoc.exists()) {
         const data = profileDoc.data();
         setName(data.name || '');
+        setProfileImage(data.profileImage || null);
       }
     } catch (error) {
       console.error('Error loading profile data:', error);
@@ -39,14 +44,52 @@ export default function CustomerSetting() {
     }
   }
 
-  async function reauthenticate(currentPassword: string) {
+  const pickImage = async (): Promise<void> => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      uploadImage(result.assets[0].uri);
+    }
+  };
+
+  const uploadImage = async (uri: string): Promise<void> => {
+    if (!user) return;
+
+    const response = await fetch(uri);
+    const blob = await response.blob();
+
+    const storageRef = ref(storage, `profileImages/${user.uid}`);
+    setLoading(true);
+
+    try {
+      await uploadBytes(storageRef, blob);
+      const url = await getDownloadURL(storageRef);
+
+      setProfileImage(url);
+
+      await updateDoc(doc(firestore, 'customers', user.uid), { profileImage: url });
+      Alert.alert('Success', 'Profile image updated successfully.');
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      Alert.alert('Error', 'Could not upload image.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  async function reauthenticate(currentPassword: string): Promise<void> {
     if (!user) return;
 
     const credential = EmailAuthProvider.credential(user.email || '', currentPassword);
     await reauthenticateWithCredential(user, credential);
   }
 
-  async function saveProfileChanges() {
+  async function saveProfileChanges(): Promise<void> {
     if (!user) {
       Alert.alert("Error", "User is not logged in.");
       return;
@@ -64,19 +107,17 @@ export default function CustomerSetting() {
         await reauthenticate(currentPassword);
       }
 
-      // Update Firestore profile data
       await updateDoc(doc(firestore, 'customers', user.uid), { name });
 
-      // Update password if provided
       if (password) {
         await updatePassword(user, password);
       }
 
       Alert.alert('Success', 'Profile updated successfully.');
       router.push('/tabs/(auth)/loggedin/Profiles/CustomerProfile');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error saving profile changes:', error);
-      Alert.alert('Error', error.message || 'Could not save profile changes. Please try again.');
+      Alert.alert('Error', 'Could not save profile changes. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -91,6 +132,17 @@ export default function CustomerSetting() {
       <View style={styles.innerContainer}>
         <Text style={styles.title}>Edit Profile</Text>
 
+        {/* Profile Image */}
+        <TouchableOpacity onPress={pickImage}>
+          {profileImage ? (
+            <Image source={{ uri: profileImage }} style={styles.profilePicture} />
+          ) : (
+            <View style={styles.profilePicturePlaceholder}>
+              <Text style={styles.profilePictureText}>+</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+
         <Text style={styles.label}>Name</Text>
         <TextInput
           style={styles.input}
@@ -104,8 +156,8 @@ export default function CustomerSetting() {
         <Text style={styles.label}>Email</Text>
         <Text style={styles.nonEditableText}>{user?.email}</Text>
 
+        {/* New Password Fields */}
         <Text style={styles.label}>New Password</Text>
-        {/* Password Fields */}
         <TextInput
           style={styles.input}
           placeholder="New Password"
@@ -114,7 +166,6 @@ export default function CustomerSetting() {
           secureTextEntry
         />
         <Text style={styles.label}>Current Password</Text>
-
         <TextInput
           style={styles.input}
           placeholder="Current Password (required to update password)"
@@ -151,15 +202,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
     color: '#4A4A4A',
     textAlign: 'center',
   },
   label: {
     fontSize: 16,
     color: '#4A4A4A',
-    marginTop: 20,
-    marginBottom: 10,
+    marginVertical: 10,
   },
   input: {
     width: '100%',
@@ -170,7 +219,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 20,
     backgroundColor: '#FFFFFF',
-    color: '#4A4A4A',
   },
   nonEditableText: {
     fontSize: 16,
@@ -178,8 +226,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F0F0',
     padding: 10,
     borderRadius: 8,
-    marginTop: 5,
-    marginBottom: 15,
+    marginBottom: 20,
   },
   saveButton: {
     backgroundColor: '#5A6B5C',
@@ -201,5 +248,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  profilePicture: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 3,
+    borderColor: '#fff',
+    marginTop: 20,
+    alignSelf: 'center',
+  },
+  profilePicturePlaceholder: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 3,
+    borderColor: '#fff',
+    marginTop: 20,
+    backgroundColor: '#ccc',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+  },
+  profilePictureText: {
+    fontSize: 24,
+    color: '#FFF',
+  },
 });
-

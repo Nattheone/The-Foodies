@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert, TouchableOpacity, Linking } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Alert, TouchableOpacity, Linking, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
@@ -17,6 +17,7 @@ export default function RestaurantProfile() {
   const [businessName, setBusinessName] = useState('');
   const [hours, setHours] = useState<Record<string, string>>({});
   const [address, setAddress] = useState('');
+  const [profileImage, setProfileImage] = useState<string | null>(null);
   const [coordinates, setCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -34,6 +35,7 @@ export default function RestaurantProfile() {
         setBusinessName(data.businessName || 'No name set');
         setHours(data.hours || {});
         setAddress(data.address || 'No address set');
+        setProfileImage(data.profileImage || null); // Set profile image if available
         if (data.address) {
           await geocodeAddress(data.address);
         }
@@ -86,7 +88,14 @@ export default function RestaurantProfile() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.profilePicturePlaceholder} />
+        {/* Display Profile Image or Placeholder */}
+        {profileImage ? (
+          <Image source={{ uri: profileImage }} style={styles.profilePicture} />
+        ) : (
+          <View style={styles.profilePicturePlaceholder}>
+            <Text style={styles.profilePictureText}>+</Text>
+          </View>
+        )}
 
         <Text style={styles.name}>{businessName}</Text>
 
@@ -149,6 +158,14 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 20,
     paddingBottom: 30,
   },
+  profilePicture: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 3,
+    borderColor: '#fff',
+    marginTop: 50,
+  },
   profilePicturePlaceholder: {
     width: 120,
     height: 120,
@@ -159,6 +176,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#ccc',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  profilePictureText: {
+    fontSize: 24,
+    color: '#FFF',
   },
   name: {
     fontSize: 24,
@@ -203,7 +224,7 @@ const styles = StyleSheet.create({
     color: '#4A4A4A',
     textAlign: 'center',
     marginBottom: 10,
-    textDecorationLine: 'underline', // Makes it look clickable
+    textDecorationLine: 'underline',
   },
   hoursContainer: {
     marginTop: 10,

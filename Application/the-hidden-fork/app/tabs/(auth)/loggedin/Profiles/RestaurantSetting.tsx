@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { getAuth, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { app } from '../../../../../firebaseConfig';
 
 const firestore = getFirestore(app);
+const storage = getStorage(app);
 
 export default function RestaurantSetting() {
   const auth = getAuth(app);
@@ -23,6 +26,7 @@ export default function RestaurantSetting() {
     Sat: 'CLOSED',
     Sun: 'CLOSED',
   });
+  const [profileImage, setProfileImage] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState('');
   const [currentPassword, setCurrentPassword] = useState(''); // Current password field for re-authentication
   const [loading, setLoading] = useState(true);
@@ -41,6 +45,7 @@ export default function RestaurantSetting() {
         setBusinessName(data.businessName || '');
         setAddress(data.address || '');
         setHours(data.hours || hours);
+        setProfileImage(data.profileImage || null); // Set profile image if available
       } else {
         Alert.alert('Error', 'Restaurant profile not found.');
       }
@@ -51,6 +56,44 @@ export default function RestaurantSetting() {
       setLoading(false);
     }
   }
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      uploadImage(result.assets[0].uri);
+    }
+  };
+
+  const uploadImage = async (uri: string) => {
+    if (!user) return;
+
+    const response = await fetch(uri);
+    const blob = await response.blob();
+
+    const storageRef = ref(storage, `restaurantImages/${user.uid}`);
+    setLoading(true);
+
+    try {
+      await uploadBytes(storageRef, blob);
+      const url = await getDownloadURL(storageRef);
+
+      setProfileImage(url);
+
+      await setDoc(doc(firestore, 'restaurants', user.uid), { profileImage: url }, { merge: true });
+      Alert.alert('Success', 'Profile image updated successfully.');
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      Alert.alert('Error', 'Could not upload image.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleHourChange = (day: string, value: string) => {
     setHours(prevHours => ({ ...prevHours, [day]: value }));
@@ -121,6 +164,17 @@ export default function RestaurantSetting() {
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.title}>Edit Restaurant Profile</Text>
+
+        {/* Profile Image */}
+        <TouchableOpacity onPress={pickImage}>
+          {profileImage ? (
+            <Image source={{ uri: profileImage }} style={styles.profilePicture} />
+          ) : (
+            <View style={styles.profilePicturePlaceholder}>
+              <Text style={styles.profilePictureText}>+</Text>
+            </View>
+          )}
+        </TouchableOpacity>
 
         {/* Business Name */}
         <Text style={styles.label}>Business Name</Text>
@@ -207,6 +261,31 @@ const styles = StyleSheet.create({
     color: '#5A6B5C',
     marginBottom: 20,
     textAlign: 'center',
+  },
+  profilePicture: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 3,
+    borderColor: '#fff',
+    marginTop: 20,
+    alignSelf: 'center',
+  },
+  profilePicturePlaceholder: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 3,
+    borderColor: '#fff',
+    marginTop: 20,
+    backgroundColor: '#ccc',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+  },
+  profilePictureText: {
+    fontSize: 24,
+    color: '#FFF',
   },
   label: {
     fontSize: 16,
