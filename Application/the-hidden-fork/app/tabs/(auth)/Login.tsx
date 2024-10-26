@@ -33,7 +33,7 @@ export default function Login() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       Alert.alert('Success', 'Login successful!', [
-        { text: 'Okay', onPress: () => router.push('/tabs/(auth)/Signup') },
+        { text: 'Okay', onPress: () => router.push('/tabs/(auth)/loggedin/InitalSignUpLoading') },
       ]);
     } catch (error: any) {
       Alert.alert('Something went wrong', error.message);
@@ -86,7 +86,7 @@ export default function Login() {
           <Text style={styles.link}>Don't have an account? </Text>
           <Text
             style={[styles.link, { color: '#5A6B5C' }]}
-            onPress={() => router.push('/tabs/(auth)/Signup')}
+            onPress={() => router.push('/tabs/(auth)/loggedin/InitalSignUpLoading')}
           >
             Sign up
           </Text>

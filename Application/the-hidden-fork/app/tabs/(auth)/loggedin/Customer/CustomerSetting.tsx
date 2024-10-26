@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 import {app} from '../../../../../firebaseConfig';
 
 const firestore = getFirestore(app);
 
-export default function CustomerProfile() {
+export default function Settings() {
   const router = useRouter();
   const auth = getAuth(app);
   const user = auth.currentUser;
@@ -16,7 +16,6 @@ export default function CustomerProfile() {
   const [contactInfo, setContactInfo] = useState('');
   const [bio, setBio] = useState('');
   const [loading, setLoading] = useState(true);
-  const [isOwner, setIsOwner] = useState(false); // State to track if the user owns this profile
 
   useEffect(() => {
     if (user) {
@@ -29,18 +28,34 @@ export default function CustomerProfile() {
       const profileDoc = await getDoc(doc(firestore, 'customers', userId));
       if (profileDoc.exists()) {
         const data = profileDoc.data();
-        setName(data.name || 'No name set');
-        setContactInfo(data.contactInfo || 'No contact info set');
-        setBio(data.bio || 'No bio set');
-        
-        // Check if the logged-in user is the owner of this profile
-        setIsOwner(userId === user?.uid);
+        setName(data.name || '');
+        setContactInfo(data.contactInfo || '');
+        setBio(data.bio || '');
       }
     } catch (error) {
       console.error('Error loading profile data:', error);
       Alert.alert('Error', 'Could not load profile data.');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function saveProfileData() {
+    if (!user) return;
+
+    try {
+      await setDoc(doc(firestore, 'customers', user.uid), {
+        name: name,
+        contactInfo: contactInfo,
+        bio: bio,
+      }, { merge: true });
+      Alert.alert('Success', 'Profile updated successfully.');
+
+      // Navigate back to the CustomerProfile page after saving
+      router.back();
+    } catch (error) {
+      console.error('Error saving profile data:', error);
+      Alert.alert('Error', 'Could not save profile data. Please try again.');
     }
   }
 
@@ -55,28 +70,33 @@ export default function CustomerProfile() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Your Profile</Text>
+      <Text style={styles.title}>Edit Profile</Text>
 
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Name:</Text>
-        <Text style={styles.infoText}>{name}</Text>
-      </View>
+      <TextInput
+        style={styles.input}
+        placeholder="Name"
+        placeholderTextColor="#A8A8A8"
+        value={name}
+        onChangeText={setName}
+      />
+      <TextInput
+        style={[styles.input, { marginTop: 15 }]}
+        placeholder="Contact Information"
+        placeholderTextColor="#A8A8A8"
+        value={contactInfo}
+        onChangeText={setContactInfo}
+      />
+      <TextInput
+        style={[styles.input, { marginTop: 15 }]}
+        placeholder="Bio"
+        placeholderTextColor="#A8A8A8"
+        value={bio}
+        onChangeText={setBio}
+      />
 
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Contact Info:</Text>
-        <Text style={styles.infoText}>{contactInfo}</Text>
-      </View>
-
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Bio:</Text>
-        <Text style={styles.infoText}>{bio}</Text>
-      </View>
-
-      {isOwner && (
-        <TouchableOpacity style={styles.button} onPress={() => router.push('/tabs/(auth)/loggedin/Customer/CustomerSetting')}>
-          <Text style={styles.buttonText}>Edit Profile</Text>
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity style={styles.button} onPress={saveProfileData}>
+        <Text style={styles.buttonText}>Save Profile</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -95,20 +115,12 @@ const styles = StyleSheet.create({
     color: '#4A4A4A',
     marginBottom: 20,
   },
-  infoContainer: {
-    width: '100%',
-    marginBottom: 15,
-    padding: 10,
-    backgroundColor: '#E5E5E5',
+  input: {
+    width: '90%',
+    height: 45,
     borderRadius: 6,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#4A4A4A',
-  },
-  infoText: {
-    fontSize: 16,
+    paddingHorizontal: 10,
+    backgroundColor: '#E5E5E5',
     color: '#4A4A4A',
   },
   button: {
@@ -116,8 +128,8 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     backgroundColor: '#5A6B5C',
     borderRadius: 6,
+    marginTop: 25,
     alignItems: 'center',
-    marginTop: 20,
   },
   buttonText: {
     color: '#FFFFFF',
