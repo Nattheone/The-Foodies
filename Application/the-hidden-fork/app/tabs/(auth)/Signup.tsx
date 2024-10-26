@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
 import { useRouter } from 'expo-router';
@@ -42,7 +43,7 @@ export default function Signup() {
     } catch (error: any) {
       Alert.alert('Something went wrong', error.message);
     } finally {
-      setLoading(false); // Ensure loading state is reset
+      setLoading(false);
     }
   }
 
@@ -53,6 +54,12 @@ export default function Signup() {
       keyboardVerticalOffset={80}
     >
       <View style={styles.innerContainer}>
+        {/* Add SVG Image */}
+        <Image
+          source={require('../../../assets/green_fork.svg')} // Replace with the correct path to green_fork.svg or .png
+          style={styles.logo}
+        />
+
         <Text style={styles.title}>Sign Up</Text>
 
         <TextInput
@@ -110,6 +117,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     backgroundColor: '#F8F8F8',
+  },
+  logo: {
+    width: 100, // Adjust as needed
+    height: 100, // Adjust as needed
+    marginBottom: 20,
   },
   title: {
     fontSize: 30,
