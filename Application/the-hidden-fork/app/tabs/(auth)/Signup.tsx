@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
 import { useRouter } from 'expo-router';
-import app from '../../../firebaseConfig';
+import {app} from '../../../firebaseConfig';
 
 export default function Signup() {
   const router = useRouter();
@@ -38,7 +38,7 @@ export default function Signup() {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
       Alert.alert('Success', 'Account created successfully. Please log in.', [
-        { text: 'Okay', onPress: () => router.push('/tabs/GetStarted') },
+        { text: 'Okay', onPress: () => router.push('/tabs/(auth)/loggedin/UserSelection') },
       ]);
     } catch (error: any) {
       Alert.alert('Something went wrong', error.message);
