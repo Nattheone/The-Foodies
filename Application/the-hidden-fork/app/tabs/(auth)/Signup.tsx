@@ -1,202 +1,162 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import { createUserWithEmailAndPassword, getAuth, updateProfile } from 'firebase/auth';
 import { useRouter } from 'expo-router';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../../firebaseConfig'; // Import your Firebase config
+import app from '../../../firebaseConfig';
 
 export default function Signup() {
   const router = useRouter();
-
-  // State for user type (Customer or Business)
-  const [userType, setUserType] = useState('customer');
-
-  // Form states
-  const [name, setName] = useState('');
-  const [businessName, setBusinessName] = useState('');
-  const [businessType, setBusinessType] = useState('Food Truck');
+  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [userName, setUserName] = useState('');
 
-  // Form validation and submission
-  const handleSignup = async () => {
-    setError(null); // Clear any previous errors
-
-    // Basic form validation
-    if (!email || !password || (userType === 'customer' && !name) || (userType === 'business' && !businessName)) {
-      setError('Please fill all required fields.');
+  async function registerUser() {
+    if (!email || !password || !userName) {
+      Alert.alert('Validation Error', 'Please fill all required fields.');
       return;
     }
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      Alert.alert('Validation Error', 'Passwords do not match.');
       return;
     }
 
+    setLoading(true);
+    const auth = getAuth(app);
+
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      alert('Sign up successful!');
-      router.push('../auth/Login'); // Navigate to login after sign-up
-    } catch (err: any) {
-      setError(err.message); // Set the error if signup fails
+      const response = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(response.user, { displayName: userName });
+
+      Alert.alert('Success', 'Account created successfully. Please log in.', [
+        { text: 'Okay', onPress: () => router.push('/tabs/(auth)/Login') },
+      ]);
+    } catch (error: any) {
+      Alert.alert('Something went wrong', error.message);
+    } finally {
+      setLoading(false); // Ensure loading state is reset
     }
-  };
+  }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Sign Up</Text>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={80}
+    >
+      <View style={styles.innerContainer}>
+        <Text style={styles.title}>Sign Up</Text>
 
-      {/* Display any error messages */}
-      {error && <Text style={styles.errorText}>{error}</Text>}
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          placeholderTextColor="#4A4A4A"
+          onChangeText={setUserName}
+        />
+        <TextInput
+          style={[styles.input, { marginTop: 15 }]}
+          placeholder="Email"
+          placeholderTextColor="#4A4A4A"
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <TextInput
+          style={[styles.input, { marginTop: 15 }]}
+          placeholder="Password"
+          placeholderTextColor="#4A4A4A"
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+        <TextInput
+          style={[styles.input, { marginTop: 15 }]}
+          placeholder="Confirm Password"
+          placeholderTextColor="#4A4A4A"
+          onChangeText={setConfirmPassword}
+          secureTextEntry
+        />
 
-      {/* Toggle between Business and Customer */}
-      <View style={styles.toggleContainer}>
-        <TouchableOpacity
-          style={[styles.toggleButton, userType === 'business' && styles.activeButton]}
-          onPress={() => setUserType('business')}
-        >
-          <Text style={styles.toggleText}>Business</Text>
+        <TouchableOpacity style={styles.button} onPress={registerUser}>
+          {loading ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : (
+            <Text style={styles.buttonText}>Register</Text>
+          )}
         </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.toggleButton, userType === 'customer' && styles.activeButton]}
-          onPress={() => setUserType('customer')}
-        >
-          <Text style={styles.toggleText}>Customer</Text>
-        </TouchableOpacity>
+
+        <View style={styles.register}>
+          <Text style={styles.link}>Already have an account? </Text>
+          <Text
+            style={[styles.link, { color: 'teal' }]}
+            onPress={() => router.push('/tabs/(auth)/Login')}
+          >
+            Log in
+          </Text>
+        </View>
       </View>
-
-      {/* Form for Customer or Business */}
-      {userType === 'customer' ? (
-        <>
-          <TextInput
-            placeholder="First Name"
-            style={styles.input}
-            value={name}
-            onChangeText={setName}
-          />
-        </>
-      ) : (
-        <>
-          <TextInput
-            placeholder="Business Name"
-            style={styles.input}
-            value={businessName}
-            onChangeText={setBusinessName}
-          />
-          <View style={styles.toggleContainer}>
-            <TouchableOpacity
-              style={[styles.toggleButton, businessType === 'Food Truck' && styles.activeButton]}
-              onPress={() => setBusinessType('Food Truck')}
-            >
-              <Text style={styles.toggleText}>Food Truck</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.toggleButton, businessType === 'Restaurant' && styles.activeButton]}
-              onPress={() => setBusinessType('Restaurant')}
-            >
-              <Text style={styles.toggleText}>Restaurant</Text>
-            </TouchableOpacity>
-          </View>
-        </>
-      )}
-
-      {/* Shared Email, Password and Confirm Password Fields */}
-      <TextInput
-        placeholder="Email"
-        style={styles.input}
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <TextInput
-        placeholder="Password"
-        style={styles.input}
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry={true}
-      />
-      <TextInput
-        placeholder="Confirm Password"
-        style={styles.input}
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry={true}
-      />
-
-      <TouchableOpacity style={styles.button} onPress={handleSignup}>
-        <Text style={styles.buttonText}>Sign Up</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => router.push('../Login')}>
-        <Text style={styles.loginText}>Already have an account? Log in</Text>
-      </TouchableOpacity>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  innerContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#F8F8F8',
   },
   title: {
     fontSize: 30,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#6A7E61',
-  },
-  toggleContainer: {
-    flexDirection: 'row',
-    marginBottom: 20,
-  },
-  toggleButton: {
-    flex: 1,
-    padding: 10,
-    borderColor: '#6A7E61',
-    borderWidth: 1,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginHorizontal: 5,
-  },
-  activeButton: {
-    backgroundColor: '#6A7E61',
-  },
-  toggleText: {
-    color: '#6A7E61',
-    fontWeight: 'bold',
+    color: '#4A4A4A',
   },
   input: {
-    width: '100%',
-    height: 50,
-    borderColor: '#6A7E61',
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    marginVertical: 10,
+    width: '90%',
+    height: 45,
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    backgroundColor: '#f5f5f5',
+    alignSelf: 'center',
+    color: '#4A4A4A',
   },
   button: {
-    width: '100%',
-    backgroundColor: '#6A7E61',
-    paddingVertical: 15,
-    borderRadius: 10,
+    width: '90%',
+    height: 45,
+    backgroundColor: '#5A6B5C',
+    borderRadius: 6,
+    marginTop: 25,
+    alignSelf: 'center',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+    color: '#F8F8F8',
+    fontSize: 16,
   },
-  loginText: {
-    color: '#6A7E61',
-    marginTop: 15,
+  register: {
+    marginTop: 25,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  errorText: {
-    color: 'red',
-    marginBottom: 10,
+  link: {
+    fontSize: 15,
+    color: '#798B67',
   },
 });

@@ -1,115 +1,136 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import { signInWithEmailAndPassword, getAuth } from 'firebase/auth';
 import { useRouter } from 'expo-router';
+import app from '../../../firebaseConfig';
 
 export default function Login() {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  // State management for form fields
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [error, setError] = useState<string | null>(null);
-
-  // Function to handle login
-  const handleLogin = async () => {
-    if (!email || !password) {
-      setError('Please fill all fields.');
-      return;
-    }
-
+  async function registerAndLogin() {
+    setLoading(true);
     try {
-      // Firebase login
+      const auth = getAuth(app);
       await signInWithEmailAndPassword(auth, email, password);
-      alert('Login successful!');
-      // Navigate to the home page or dashboard after successful login
-      router.push('/tabs/GetStarted');
-    } catch (err: any) {
-      setError(err.message); // Display error if login fails
+      setLoading(false);
+      
+      // Replace the current screen with "choose image"
+      //router.replace('/choose-image'); // Replace with the correct route path
+    } catch (error: any) {
+      setLoading(false);
+      Alert.alert('Oops', error.message);
     }
-  };
+  }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={80}
+    >
+      <View style={styles.innerContainer}>
+        <Text style={styles.title}>Login</Text>
 
-      {/* Error message display */}
-      {error && <Text style={styles.errorText}>{error}</Text>}
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor="#4A4A4A"
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <TextInput
+          style={[styles.input, { marginTop: 15 }]}
+          placeholder="Password"
+          placeholderTextColor="#4A4A4A"
+          onChangeText={setPassword}
+          secureTextEntry
+        />
 
-      {/* Email Input */}
-      <TextInput
-        placeholder="Email"
-        style={styles.input}
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
+        <TouchableOpacity style={styles.button} onPress={registerAndLogin}>
+          {loading ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : (
+            <Text style={styles.buttonText}>Login</Text>
+          )}
+        </TouchableOpacity>
 
-      {/* Password Input */}
-      <TextInput
-        placeholder="Password"
-        style={styles.input}
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry={true} // Mask the password
-      />
-
-      {/* Login Button */}
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
-
-      {/* Navigation to Sign Up */}
-      <TouchableOpacity onPress={() => router.push('/tabs/(auth)/Signup')}>
-        <Text style={styles.signupText}>Don't have an account? Sign up</Text>
-      </TouchableOpacity>
-    </View>
+        <View style={styles.register}>
+          <Text style={styles.link}>Don't have an account? </Text>
+          <Text
+            style={[styles.link, { color: '#5A6B5C' }]}
+            onPress={() => router.push('/tabs/(auth)/Signup')}
+          >
+            Sign up
+          </Text>
+        </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F8F8F8', // Light background color from the palette
+  },
+  innerContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#F8F8F8', // Same background as container
   },
   title: {
     fontSize: 30,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#6A7E61',
+    color: '#4A4A4A', // Darker gray for title text
   },
   input: {
-    width: '100%',
-    height: 50,
-    borderColor: '#6A7E61',
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    marginVertical: 10,
+    width: '90%',
+    height: 45,
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    backgroundColor: '#E5E5E5', // Slightly lighter gray for input background
+    alignSelf: 'center',
+    color: '#4A4A4A', // Darker gray text inside input
   },
   button: {
-    width: '100%',
-    backgroundColor: '#6A7E61',
-    paddingVertical: 15,
-    borderRadius: 10,
+    width: '90%',
+    height: 45,
+    backgroundColor: '#5A6B5C', // Dark green for button background
+    borderRadius: 6,
+    marginTop: 25,
+    alignSelf: 'center',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+    color: '#F8F8F8', // Light text on the dark green button
+    fontSize: 16,
   },
-  signupText: {
-    color: '#6A7E61',
-    marginTop: 15,
+  register: {
+    marginTop: 25,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  errorText: {
-    color: 'red',
-    marginBottom: 10,
+  link: {
+    fontSize: 15,
+    color: '#798B67', // Olive green for link text
   },
 });
