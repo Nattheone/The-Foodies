@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Alert, TouchableOpacity, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
@@ -65,6 +65,15 @@ export default function RestaurantProfile() {
     }
   }
 
+  function openMaps() {
+    if (coordinates) {
+      const url = `maps://?q=${coordinates.latitude},${coordinates.longitude}`;
+      Linking.openURL(url).catch(() => 
+        Alert.alert('Error', 'Failed to open Apple Maps.')
+      );
+    }
+  }
+
   if (loading) {
     return (
       <View style={styles.container}>
@@ -90,7 +99,7 @@ export default function RestaurantProfile() {
       </View>
 
       <View style={styles.infoCard}>
-        <Text style={styles.sectionTitle}>Address & Hours</Text>
+        <Text style={styles.sectionTitle}>ADDRESS & HOURS</Text>
 
         {/* Map View */}
         {coordinates ? (
@@ -109,9 +118,12 @@ export default function RestaurantProfile() {
           <Text style={styles.loadingText}>Location not available</Text>
         )}
 
-        <Text style={styles.address}>{address}</Text>
+        {/* Clickable Address */}
+        <TouchableOpacity onPress={openMaps}>
+          <Text style={styles.address}>{address}</Text>
+        </TouchableOpacity>
 
-        {/* Hours of Operation */}
+        {/* Hours Section */}
         <View style={styles.hoursContainer}>
           {Object.entries(hours).map(([day, time]) => (
             <View key={day} style={styles.hoursRow}>
@@ -181,7 +193,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   map: {
-    height: 100,
+    width: '100%',
+    height: 150,
     borderRadius: 8,
     marginBottom: 10,
   },
@@ -190,6 +203,7 @@ const styles = StyleSheet.create({
     color: '#4A4A4A',
     textAlign: 'center',
     marginBottom: 10,
+    textDecorationLine: 'underline', // Makes it look clickable
   },
   hoursContainer: {
     marginTop: 10,
