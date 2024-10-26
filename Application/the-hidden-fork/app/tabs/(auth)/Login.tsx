@@ -28,8 +28,7 @@ export default function Login() {
       setLoading(false);
       
       // Replace the current screen with "choose image"
-      //router.replace('/choose-image'); // Replace with the correct route path
-    } catch (error: any) {
+          router.push('/tabs/GetStarted')    } catch (error: any) {
       setLoading(false);
       Alert.alert('Oops', error.message);
     }

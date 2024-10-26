@@ -10,7 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { createUserWithEmailAndPassword, getAuth, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
 import { useRouter } from 'expo-router';
 import app from '../../../firebaseConfig';
 
@@ -20,10 +20,9 @@ export default function Signup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [userName, setUserName] = useState('');
 
   async function registerUser() {
-    if (!email || !password || !userName) {
+    if (!email || !password) {
       Alert.alert('Validation Error', 'Please fill all required fields.');
       return;
     }
@@ -36,11 +35,9 @@ export default function Signup() {
     const auth = getAuth(app);
 
     try {
-      const response = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(response.user, { displayName: userName });
-
+      await createUserWithEmailAndPassword(auth, email, password);
       Alert.alert('Success', 'Account created successfully. Please log in.', [
-        { text: 'Okay', onPress: () => router.push('/tabs/(auth)/Login') },
+        { text: 'Okay', onPress: () => router.push('/tabs/GetStarted') },
       ]);
     } catch (error: any) {
       Alert.alert('Something went wrong', error.message);
@@ -60,12 +57,6 @@ export default function Signup() {
 
         <TextInput
           style={styles.input}
-          placeholder="Username"
-          placeholderTextColor="#4A4A4A"
-          onChangeText={setUserName}
-        />
-        <TextInput
-          style={[styles.input, { marginTop: 15 }]}
           placeholder="Email"
           placeholderTextColor="#4A4A4A"
           onChangeText={setEmail}
@@ -98,7 +89,7 @@ export default function Signup() {
         <View style={styles.register}>
           <Text style={styles.link}>Already have an account? </Text>
           <Text
-            style={[styles.link, { color: 'teal' }]}
+            style={[styles.link, { color: '#5A6B5C' }]}
             onPress={() => router.push('/tabs/(auth)/Login')}
           >
             Log in
@@ -131,7 +122,7 @@ const styles = StyleSheet.create({
     height: 45,
     borderRadius: 6,
     paddingHorizontal: 10,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#E5E5E5',
     alignSelf: 'center',
     color: '#4A4A4A',
   },
