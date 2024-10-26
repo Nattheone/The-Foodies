@@ -26,7 +26,7 @@ export default function InitialSignUpLoading() {
       // Check if user is in the 'customers' collection
       const customerDoc = await getDoc(doc(firestore, 'customers', userId));
       if (customerDoc.exists()) {
-         router.replace('/tabs/(auth)/loggedin/Customer/CustomerProfile'); // Navigate to customer profile setup
+         router.replace('/'); // Navigate to customer profile setup
         return;
       }
 
