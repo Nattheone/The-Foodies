@@ -81,7 +81,7 @@ export default function CustomerProfile() {
         <TouchableOpacity style={styles.navButton} onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/CustomerProfile')}>
           <Text style={styles.navButtonText}>Profile</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton} onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/features/SearchCustomerMap')}>
+        <TouchableOpacity style={styles.navButton} onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/features/Search')}>
           <Text style={styles.navButtonText}>Search</Text>
         </TouchableOpacity>
       </View>
