@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, Platform, Image, Switch } from 'react-native';
 import { getAuth, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
 import { useRouter } from 'expo-router';
 import { app } from '../../../../../firebaseConfig';
 
@@ -26,10 +27,14 @@ export default function RestaurantSetting() {
     Sat: 'CLOSED',
     Sun: 'CLOSED',
   });
+  const [restaurantType, setRestaurantType] = useState<'Restaurant' | 'Food Truck'>('Restaurant');
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [newPassword, setNewPassword] = useState('');
-  const [currentPassword, setCurrentPassword] = useState(''); // Current password field for re-authentication
+  const [currentPassword, setCurrentPassword] = useState('');
   const [loading, setLoading] = useState(true);
+
+  const availableTags = ['Family-Friendly', 'Fine Dining', 'Fast Food', 'Casual', 'Barbeque', 'Asian', 'Italian', 'Mexican', 'Indian', 'Dine-In', 'Cafe', 'African'];
 
   useEffect(() => {
     if (user) {
@@ -45,7 +50,9 @@ export default function RestaurantSetting() {
         setBusinessName(data.businessName || '');
         setAddress(data.address || '');
         setHours(data.hours || hours);
-        setProfileImage(data.profileImage || null); // Set profile image if available
+        setProfileImage(data.profileImage || null);
+        setSelectedTags(data.tags || []);
+        setRestaurantType(data.restaurantType || 'Restaurant');
       } else {
         Alert.alert('Error', 'Restaurant profile not found.');
       }
@@ -57,6 +64,17 @@ export default function RestaurantSetting() {
     }
   }
 
+  // Function to resize and compress image
+  const compressImage = async (uri: string) => {
+    const compressedImage = await ImageManipulator.manipulateAsync(
+      uri,
+      [{ resize: { width: 1024 } }], // Resize to max width of 1024px
+      { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG } // Compress to 70% quality
+    );
+    return compressedImage.uri;
+  };
+
+  // Updated pickImage function
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -66,10 +84,12 @@ export default function RestaurantSetting() {
     });
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      uploadImage(result.assets[0].uri);
+      const compressedUri = await compressImage(result.assets[0].uri);
+      uploadImage(compressedUri); // Use the compressed image URI for upload
     }
   };
 
+  // Updated uploadImage function to use compressed image
   const uploadImage = async (uri: string) => {
     if (!user) return;
 
@@ -92,6 +112,14 @@ export default function RestaurantSetting() {
       Alert.alert('Error', 'Could not upload image.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleTagSelect = (tag: string) => {
+    if (selectedTags.includes(tag)) {
+      setSelectedTags(selectedTags.filter(selected => selected !== tag));
+    } else if (selectedTags.length < 2) {
+      setSelectedTags([...selectedTags, tag]);
     }
   };
 
@@ -118,26 +146,25 @@ export default function RestaurantSetting() {
     if (!user) return;
 
     try {
-      // Re-authenticate if password is being changed
       if (newPassword) {
         const reauthenticated = await reauthenticateUser();
         if (!reauthenticated) return;
       }
 
-      // Update Firestore document
       await setDoc(doc(firestore, 'restaurants', user.uid), {
         businessName,
         address,
         hours,
+        restaurantType,
+        tags: selectedTags,
       }, { merge: true });
 
-      // Update password if provided
       if (newPassword) {
         await updatePassword(user, newPassword);
       }
 
       Alert.alert('Success', 'Restaurant profile updated successfully');
-      router.back(); // Navigate back after saving
+      router.back();
     } catch (error) {
       console.error('Error saving settings:', error);
       Alert.alert('Error', 'Could not save settings.');
@@ -145,7 +172,7 @@ export default function RestaurantSetting() {
   }
 
   const cancelChanges = () => {
-    router.back(); // Navigate back without saving
+    router.back();
   };
 
   if (loading) {
@@ -165,7 +192,6 @@ export default function RestaurantSetting() {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.title}>Edit Restaurant Profile</Text>
 
-        {/* Profile Image */}
         <TouchableOpacity onPress={pickImage}>
           {profileImage ? (
             <Image source={{ uri: profileImage }} style={styles.profilePicture} />
@@ -176,7 +202,6 @@ export default function RestaurantSetting() {
           )}
         </TouchableOpacity>
 
-        {/* Business Name */}
         <Text style={styles.label}>Business Name</Text>
         <TextInput
           style={styles.input}
@@ -185,7 +210,6 @@ export default function RestaurantSetting() {
           placeholder="Enter business name"
         />
 
-        {/* Address */}
         <Text style={styles.label}>Address</Text>
         <TextInput
           style={styles.input}
@@ -194,7 +218,16 @@ export default function RestaurantSetting() {
           placeholder="Enter address"
         />
 
-        {/* Hours of Operation */}
+        {/* Toggle for Restaurant Type */}
+        <View style={styles.toggleContainer}>
+          <Text style={styles.toggleLabel}>Restaurant Type</Text>
+          <Switch
+            value={restaurantType === 'Food Truck'}
+            onValueChange={() => setRestaurantType(restaurantType === 'Restaurant' ? 'Food Truck' : 'Restaurant')}
+          />
+          <Text style={styles.toggleOption}>{restaurantType}</Text>
+        </View>
+
         <Text style={styles.sectionTitle}>Hours of Operation</Text>
         {Object.keys(hours).map(day => (
           <View key={day} style={styles.hoursInputContainer}>
@@ -208,11 +241,32 @@ export default function RestaurantSetting() {
           </View>
         ))}
 
-        {/* Email (non-editable) */}
+        <Text style={styles.sectionTitle}>Select Tags</Text>
+        <View style={styles.tagContainer}>
+          {availableTags.map(tag => (
+            <TouchableOpacity
+              key={tag}
+              onPress={() => handleTagSelect(tag)}
+              style={[
+                styles.tagButton,
+                selectedTags.includes(tag) && styles.tagButtonSelected,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.tagButtonText,
+                  selectedTags.includes(tag) && styles.tagButtonTextSelected,
+                ]}
+              >
+                {tag}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
         <Text style={styles.label}>Email</Text>
         <Text style={styles.nonEditableText}>{user?.email}</Text>
 
-        {/* Current Password (for re-authentication) */}
         <Text style={styles.label}>Current Password</Text>
         <TextInput
           style={styles.input}
@@ -222,7 +276,6 @@ export default function RestaurantSetting() {
           secureTextEntry
         />
 
-        {/* New Password */}
         <Text style={styles.label}>New Password</Text>
         <TextInput
           style={styles.input}
@@ -232,7 +285,6 @@ export default function RestaurantSetting() {
           secureTextEntry
         />
 
-        {/* Buttons Container */}
         <View style={styles.buttonsContainer}>
           <TouchableOpacity style={styles.cancelButton} onPress={cancelChanges}>
             <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -309,6 +361,20 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginTop: 5,
   },
+  toggleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    justifyContent: 'space-between',
+  },
+  toggleLabel: {
+    fontSize: 16,
+    color: '#4A4A4A',
+  },
+  toggleOption: {
+    fontSize: 16,
+    color: '#5A6B5C',
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -334,6 +400,30 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     color: '#333',
     marginLeft: 10,
+  },
+  tagContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 10,
+  },
+  tagButton: {
+    borderWidth: 1,
+    borderColor: '#5A6B5C',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    margin: 5,
+    backgroundColor: '#F8F8F8',
+  },
+  tagButtonSelected: {
+    backgroundColor: '#5A6B5C',
+  },
+  tagButtonText: {
+    fontSize: 14,
+    color: '#5A6B5C',
+  },
+  tagButtonTextSelected: {
+    color: '#FFFFFF',
   },
   buttonsContainer: {
     flexDirection: 'row',

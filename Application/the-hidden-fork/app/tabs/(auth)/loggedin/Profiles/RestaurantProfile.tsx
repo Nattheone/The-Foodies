@@ -1,4 +1,3 @@
-// RestaurantProfile.tsx
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Alert, TouchableOpacity, Linking, Image } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -16,6 +15,8 @@ export default function RestaurantProfile() {
   const user = auth.currentUser;
 
   const [businessName, setBusinessName] = useState('');
+  const [restaurantType, setRestaurantType] = useState(''); // State to store type (Restaurant or Food Truck)
+  const [tags, setTags] = useState<string[]>([]);
   const [hours, setHours] = useState<Record<string, string>>({});
   const [address, setAddress] = useState('');
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -34,9 +35,11 @@ export default function RestaurantProfile() {
       if (profileDoc.exists()) {
         const data = profileDoc.data();
         setBusinessName(data.businessName || 'No name set');
+        setRestaurantType(data.restaurantType || ''); // Load restaurant type
+        setTags(data.tags || []);
         setHours(data.hours || {});
         setAddress(data.address || 'No address set');
-        setProfileImage(data.profileImage || null); // Set profile image if available
+        setProfileImage(data.profileImage || null);
         if (data.address) {
           await geocodeAddress(data.address);
         }
@@ -71,7 +74,7 @@ export default function RestaurantProfile() {
   function openMaps() {
     if (coordinates) {
       const url = `maps://?q=${coordinates.latitude},${coordinates.longitude}`;
-      Linking.openURL(url).catch(() => 
+      Linking.openURL(url).catch(() =>
         Alert.alert('Error', 'Failed to open Apple Maps.')
       );
     }
@@ -89,7 +92,6 @@ export default function RestaurantProfile() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        {/* Display Profile Image or Placeholder */}
         {profileImage ? (
           <Image source={{ uri: profileImage }} style={styles.profilePicture} />
         ) : (
@@ -100,8 +102,15 @@ export default function RestaurantProfile() {
 
         <Text style={styles.name}>{businessName}</Text>
 
-        <TouchableOpacity 
-          onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/RestaurantSetting')} 
+        {/* Display Restaurant Type and Tags */}
+        {(restaurantType || tags.length > 0) && (
+          <Text style={styles.tags}>
+            {[restaurantType, ...tags].filter(Boolean).join(' | ')}
+          </Text>
+        )}
+
+        <TouchableOpacity
+          onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/RestaurantSetting')}
           style={styles.editButton}
         >
           <Text style={styles.editText}>Edit</Text>
@@ -111,7 +120,6 @@ export default function RestaurantProfile() {
       <View style={styles.infoCard}>
         <Text style={styles.sectionTitle}>ADDRESS & HOURS</Text>
 
-        {/* Map View */}
         {coordinates ? (
           <MapView
             style={styles.map}
@@ -128,12 +136,10 @@ export default function RestaurantProfile() {
           <Text style={styles.loadingText}>Location not available</Text>
         )}
 
-        {/* Clickable Address */}
         <TouchableOpacity onPress={openMaps}>
           <Text style={styles.address}>{address}</Text>
         </TouchableOpacity>
 
-        {/* Hours Section */}
         <View style={styles.hoursContainer}>
           {Object.entries(hours).map(([day, time]) => (
             <View key={day} style={styles.hoursRow}>
@@ -144,7 +150,6 @@ export default function RestaurantProfile() {
         </View>
       </View>
 
-      {/* Bottom Navigation Bar */}
       <View style={styles.bottomNavBar}>
         <TouchableOpacity style={styles.navButton} onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/RestaurantProfile')}>
           <Text style={styles.navButtonText}>Profile</Text>
@@ -197,6 +202,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFFFFF',
     marginTop: 10,
+  },
+  tags: {
+    fontSize: 16,
+    color: '#FFFFFF',
+    marginTop: 5,
+    fontStyle: 'italic',
   },
   editButton: {
     position: 'absolute',
@@ -263,7 +274,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     padding: 15,
-    backgroundColor: '#798B67', // Green background color
+    backgroundColor: '#798B67',
     borderTopWidth: 1,
     borderTopColor: '#ddd',
     position: 'absolute',
@@ -275,7 +286,7 @@ const styles = StyleSheet.create({
   },
   navButtonText: {
     fontSize: 16,
-    color: '#FFFFFF', // White text color
+    color: '#FFFFFF',
     fontWeight: 'bold',
   },
 });

@@ -5,6 +5,7 @@ import { getAuth, updatePassword, reauthenticateWithCredential, EmailAuthProvide
 import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
 import { app } from '../../../../../firebaseConfig';
 
 const firestore = getFirestore(app);
@@ -44,6 +45,16 @@ export default function CustomerSetting() {
     }
   }
 
+  // Function to resize and compress image
+  const compressImage = async (uri: string) => {
+    const compressedImage = await ImageManipulator.manipulateAsync(
+      uri,
+      [{ resize: { width: 1024 } }], // Resize to max width of 1024px
+      { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG } // Compress to 70% quality
+    );
+    return compressedImage.uri;
+  };
+
   const pickImage = async (): Promise<void> => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -53,7 +64,8 @@ export default function CustomerSetting() {
     });
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      uploadImage(result.assets[0].uri);
+      const compressedUri = await compressImage(result.assets[0].uri);
+      uploadImage(compressedUri);
     }
   };
 
@@ -132,7 +144,6 @@ export default function CustomerSetting() {
       <View style={styles.innerContainer}>
         <Text style={styles.title}>Edit Profile</Text>
 
-        {/* Profile Image */}
         <TouchableOpacity onPress={pickImage}>
           {profileImage ? (
             <Image source={{ uri: profileImage }} style={styles.profilePicture} />
@@ -152,11 +163,9 @@ export default function CustomerSetting() {
           autoCapitalize="words"
         />
 
-        {/* Display-only Email */}
         <Text style={styles.label}>Email</Text>
         <Text style={styles.nonEditableText}>{user?.email}</Text>
 
-        {/* New Password Fields */}
         <Text style={styles.label}>New Password</Text>
         <TextInput
           style={styles.input}
