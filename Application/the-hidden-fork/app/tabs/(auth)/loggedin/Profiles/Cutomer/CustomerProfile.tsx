@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Ima
 import { useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
-import { app } from '../../../../../firebaseConfig';
+import { app } from '../../../../../../firebaseConfig';
 
 const firestore = getFirestore(app);
 

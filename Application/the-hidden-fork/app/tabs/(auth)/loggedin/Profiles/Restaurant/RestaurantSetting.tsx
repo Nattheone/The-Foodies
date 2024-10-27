@@ -5,7 +5,7 @@ import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import { app } from '../../../../../firebaseConfig';
+import { app } from '../../../../../../firebaseConfig';
 
 const firestore = getFirestore(app);
 const storage = getStorage(app);

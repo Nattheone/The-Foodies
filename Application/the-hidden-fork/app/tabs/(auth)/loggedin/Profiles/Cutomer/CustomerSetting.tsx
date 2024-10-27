@@ -5,7 +5,7 @@ import { getAuth, updatePassword, reauthenticateWithCredential, EmailAuthProvide
 import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import * as ImagePicker from 'expo-image-picker';
-import { app } from '../../../../../firebaseConfig';
+import { app } from '../../../../../../firebaseConfig';
 
 const firestore = getFirestore(app);
 const storage = getStorage(app);
