@@ -114,7 +114,7 @@ export default function CustomerSetting() {
       }
 
       Alert.alert('Success', 'Profile updated successfully.');
-      router.push('/tabs/(auth)/loggedin/Profiles/CustomerProfile');
+      router.push('/tabs/(auth)/loggedin/Profiles/Cutomer/CustomerProfile');
     } catch (error) {
       console.error('Error saving profile changes:', error);
       Alert.alert('Error', 'Could not save profile changes. Please try again.');
@@ -180,7 +180,7 @@ export default function CustomerSetting() {
 
         <TouchableOpacity
           style={styles.cancelButton}
-          onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/CustomerProfile')}
+          onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/Cutomer/CustomerSetting')}
         >
           <Text style={styles.cancelButtonText}>Cancel</Text>
         </TouchableOpacity>

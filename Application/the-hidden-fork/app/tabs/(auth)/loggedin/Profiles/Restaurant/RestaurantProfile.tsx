@@ -100,7 +100,7 @@ export default function RestaurantProfile() {
         <Text style={styles.name}>{businessName}</Text>
 
         <TouchableOpacity 
-          onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/RestaurantSetting')} 
+          onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/Restaurant/RestaurantSetting')} 
           style={styles.editButton}
         >
           <Text style={styles.editText}>Edit</Text>

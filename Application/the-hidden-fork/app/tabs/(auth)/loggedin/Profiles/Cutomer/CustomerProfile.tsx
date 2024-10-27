@@ -71,7 +71,7 @@ export default function CustomerProfile() {
 
         {/* Edit Button */}
         <TouchableOpacity 
-          onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/CustomerSetting')} 
+          onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/Cutomer/CustomerSetting')} 
           style={styles.editButton}
         >
           <Text style={styles.editText}>Edit</Text> 
