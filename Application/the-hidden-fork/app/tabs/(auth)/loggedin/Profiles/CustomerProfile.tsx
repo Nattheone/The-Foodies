@@ -81,7 +81,7 @@ export default function CustomerProfile() {
         <TouchableOpacity style={styles.navButton} onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/CustomerProfile')}>
           <Text style={styles.navButtonText}>Profile</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton} onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/features/Search')}>
+        <TouchableOpacity style={styles.navButton} onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/features/CustomerSearchMap')}>
           <Text style={styles.navButtonText}>Search</Text>
         </TouchableOpacity>
       </View>
@@ -161,11 +161,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     padding: 15,
+    paddingBottom: 50,
     backgroundColor: '#798B67', 
     borderTopWidth: 1,
     borderTopColor: '#ddd',
     position: 'absolute',
-    bottom: 0,
+    bottom: -50,
     width: '100%',
   },
   navButton: {

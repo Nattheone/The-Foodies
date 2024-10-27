@@ -1,5 +1,5 @@
 import { Redirect } from "expo-router";
-import React from "react";
+import * as React from 'react'; 
 
 const StartPage = () =>{
   return <Redirect href="/tabs/GetStarted"/>

@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, StatusBar, Dimensions } from 'react-native';
+import * as React from 'react'; 
+import { View, Text, TouchableOpacity, StyleSheet, StatusBar, Dimensions} from 'react-native';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 
