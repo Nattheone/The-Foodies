@@ -5,7 +5,7 @@ import { getAuth, updatePassword, reauthenticateWithCredential, EmailAuthProvide
 import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import * as ImagePicker from 'expo-image-picker';
-import { app } from '../../../../../../firebaseConfig';
+import { app } from '../../../../../firebaseConfig';
 
 const firestore = getFirestore(app);
 const storage = getStorage(app);
@@ -114,7 +114,7 @@ export default function CustomerSetting() {
       }
 
       Alert.alert('Success', 'Profile updated successfully.');
-      router.push('/tabs/(auth)/loggedin/Profiles/Cutomer/CustomerProfile');
+      router.push('/tabs/(auth)/loggedin/Profiles/CustomerProfile');
     } catch (error) {
       console.error('Error saving profile changes:', error);
       Alert.alert('Error', 'Could not save profile changes. Please try again.');
@@ -180,7 +180,7 @@ export default function CustomerSetting() {
 
         <TouchableOpacity
           style={styles.cancelButton}
-          onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/Cutomer/CustomerSetting')}
+          onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/CustomerProfile')}
         >
           <Text style={styles.cancelButtonText}>Cancel</Text>
         </TouchableOpacity>

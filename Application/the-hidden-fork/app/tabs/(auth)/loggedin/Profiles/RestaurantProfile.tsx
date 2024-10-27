@@ -1,3 +1,4 @@
+// RestaurantProfile.tsx
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Alert, TouchableOpacity, Linking, Image } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -5,7 +6,7 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
-import { app } from '../../../../../../firebaseConfig';
+import { app } from '../../../../../firebaseConfig';
 
 const firestore = getFirestore(app);
 
@@ -100,7 +101,7 @@ export default function RestaurantProfile() {
         <Text style={styles.name}>{businessName}</Text>
 
         <TouchableOpacity 
-          onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/Restaurant/RestaurantSetting')} 
+          onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/RestaurantSetting')} 
           style={styles.editButton}
         >
           <Text style={styles.editText}>Edit</Text>
@@ -141,6 +142,16 @@ export default function RestaurantProfile() {
             </View>
           ))}
         </View>
+      </View>
+
+      {/* Bottom Navigation Bar */}
+      <View style={styles.bottomNavBar}>
+        <TouchableOpacity style={styles.navButton} onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/RestaurantProfile')}>
+          <Text style={styles.navButtonText}>Profile</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navButton} onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/features/Search')}>
+          <Text style={styles.navButtonText}>Search</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -247,5 +258,24 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 16,
     color: '#4A4A4A',
+  },
+  bottomNavBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 15,
+    backgroundColor: '#798B67', // Green background color
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+  },
+  navButton: {
+    alignItems: 'center',
+  },
+  navButtonText: {
+    fontSize: 16,
+    color: '#FFFFFF', // White text color
+    fontWeight: 'bold',
   },
 });
