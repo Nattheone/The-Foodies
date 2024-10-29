@@ -3,7 +3,7 @@ import { getAuth } from 'firebase/auth';
 import { useRouter } from 'expo-router';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { app } from '../../../../../../firebaseConfig';
-import { View, StyleSheet, Text, TextInput, TouchableOpacity, FlatList, Alert } from 'react-native';
+import { View, StyleSheet, Text, TextInput, TouchableOpacity, FlatList, Alert, Modal, Button } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 
@@ -23,6 +23,8 @@ export default function SimpleMapScreen() {
   const [filteredRestaurants, setFilteredRestaurants] = useState<Restaurant[]>([]);
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
   const router = useRouter();
   const auth = getAuth(app);
   const user = auth.currentUser;
@@ -44,7 +46,7 @@ export default function SimpleMapScreen() {
           
           return {
             id: doc.id,
-            name: data.name,
+            name: data.businessName,
             address: data.address || 'Address not provided',
             ...location,
           };
@@ -62,20 +64,6 @@ export default function SimpleMapScreen() {
 
     loadRestaurants();
   }, []);
-
-  async function handleSearch() {
-    // Filter restaurants based on the search text
-    const filteredData = restaurants.filter(
-      restaurant => restaurant.name && restaurant.name.toLowerCase().includes(searchText.toLowerCase())
-    );
-    
-    setFilteredRestaurants(filteredData);
-
-
-    if (searchText && filteredData.length === 0) {
-      Alert.alert("No Results", "No restaurants found with that name.");
-    }
-  }
 
   async function geocodeAddress(address: string) {
     try {
@@ -95,6 +83,11 @@ export default function SimpleMapScreen() {
     }
   }
 
+  const openModal = (restaurant: Restaurant) => {
+    setSelectedRestaurant(restaurant);
+    setModalVisible(true);
+  };
+
   return (
     <View style={styles.container}>
       {/* Toggle between List and Map */}
@@ -113,20 +106,39 @@ export default function SimpleMapScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Search Bar and Search Button */}
+      {/* Search Bar */}
       {viewMode === 'list' && (
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
             placeholder="Search by name"
             value={searchText}
-            onChangeText={setSearchText}
+            onChangeText={text => {
+              setSearchText(text);
+              const filteredData = restaurants.filter(
+                restaurant => restaurant.name && restaurant.name.toLowerCase().includes(text.toLowerCase())
+              );
+              setFilteredRestaurants(filteredData);
+            }}
           />
-          <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-            <Text style={styles.searchButtonText}>Search</Text>
-          </TouchableOpacity>
         </View>
       )}
+
+      {/* Modal for Restaurant Details */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{selectedRestaurant?.name}</Text>
+            <Text style={styles.modalAddress}>{selectedRestaurant?.address}</Text>
+            <Button title="Close" onPress={() => setModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
 
       {/* Conditional Rendering for Map or List */}
       {viewMode === 'map' ? (
@@ -147,8 +159,7 @@ export default function SimpleMapScreen() {
                     latitude: restaurant.latitude,
                     longitude: restaurant.longitude,
                   }}
-                  title={restaurant.name}
-                  description={restaurant.address}
+                  onPress={() => openModal(restaurant)}  // Open modal on marker press
                   pinColor="#798B67"
                 />
               ) : null
@@ -163,6 +174,9 @@ export default function SimpleMapScreen() {
             <View style={styles.listItem}>
               <Text style={styles.listItemText}>{item.name}</Text>
             </View>
+          )}
+          ListEmptyComponent={() => (
+            <Text style={styles.noResultsText}>No restaurants found with that name.</Text>
           )}
           contentContainerStyle={styles.listContainer}
         />
@@ -209,29 +223,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
     paddingHorizontal: 20,
     marginVertical: 10,
   },
   searchInput: {
-    flex: 1,
     height: 40,
     borderColor: '#ddd',
     borderWidth: 1,
     paddingLeft: 10,
     borderRadius: 8,
-  },
-  searchButton: {
-    marginLeft: 10,
-    backgroundColor: '#798B67',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-  },
-  searchButtonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
   },
   map: {
     width: '100%',
@@ -247,6 +247,12 @@ const styles = StyleSheet.create({
   },
   listItemText: {
     fontSize: 16,
+  },
+  noResultsText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#999',
+    marginTop: 20,
   },
   loadingText: {
     textAlign: 'center',
@@ -272,5 +278,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#FFFFFF',
     fontWeight: 'bold',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalAddress: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
   },
 });
