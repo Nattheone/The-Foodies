@@ -1,15 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getAuth } from 'firebase/auth';
 import { useRouter } from 'expo-router';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { app } from '../../../../../../firebaseConfig';
-import { View, StyleSheet, Text, TouchableOpacity, FlatList } from 'react-native';
-import MapView from 'react-native-maps';
+import { View, StyleSheet, Text, TouchableOpacity, FlatList, Alert } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
+import * as Location from 'expo-location';
 
 const firestore = getFirestore(app);
 
+// Define a type for a restaurant object
+type Restaurant = {
+  id: string;
+  name: string;
+  address: string;
+  latitude?: number;
+  longitude?: number;
+};
+
 export default function SimpleMapScreen() {
-  const [viewMode, setViewMode] = useState('map'); // 'map' or 'list'
+  const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
   const auth = getAuth(app);
   const user = auth.currentUser;
@@ -21,11 +33,53 @@ export default function SimpleMapScreen() {
     longitudeDelta: 0.1,
   };
 
-  const sampleData = [
-    { id: '1', name: 'Restaurant A' },
-    { id: '2', name: 'Restaurant B' },
-    { id: '3', name: 'Restaurant C' },
-  ];
+  useEffect(() => {
+    async function loadRestaurants() {
+      try {
+        const querySnapshot = await getDocs(collection(firestore, 'restaurants'));
+        const restaurantData = await Promise.all(querySnapshot.docs.map(async (doc) => {
+          const data = doc.data();
+          
+          // Check if address exists to avoid passing undefined to geocodeAsync
+          const location = data.address ? await geocodeAddress(data.address) : null;
+          
+          return {
+            id: doc.id,
+            name: data.name,
+            address: data.address || 'Address not provided',
+            ...location, // include latitude and longitude from geocode if available
+          };
+        }));
+        
+        setRestaurants(restaurantData as Restaurant[]);
+      } catch (error) {
+        console.error("Error loading restaurant data:", error);
+        Alert.alert("Error", "Could not load restaurant data.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadRestaurants();
+  }, []);
+
+  async function geocodeAddress(address: string) {
+    try {
+      const [location] = await Location.geocodeAsync(address);
+      if (location) {
+        return {
+          latitude: location.latitude,
+          longitude: location.longitude,
+        };
+      } else {
+        console.warn("Geocode failed for address:", address);
+        return null;
+      }
+    } catch (error) {
+      console.error("Geocoding error:", error);
+      return null;
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -47,15 +101,33 @@ export default function SimpleMapScreen() {
 
       {/* Conditional Rendering for Map or List */}
       {viewMode === 'map' ? (
-        <MapView
-          style={styles.map}
-          initialRegion={initialRegion}
-          showsUserLocation={true}
-          showsMyLocationButton={true}
-        />
+        loading ? (
+          <Text style={styles.loadingText}>Loading map...</Text>
+        ) : (
+          <MapView
+            style={styles.map}
+            initialRegion={initialRegion}
+            showsUserLocation={true}
+            showsMyLocationButton={true}
+          >
+            {restaurants.map((restaurant) =>
+              restaurant.latitude && restaurant.longitude ? (
+                <Marker
+                  key={restaurant.id}
+                  coordinate={{
+                    latitude: restaurant.latitude,
+                    longitude: restaurant.longitude,
+                  }}
+                  title={restaurant.name}
+                  description={restaurant.address}
+                />
+              ) : null
+            )}
+          </MapView>
+        )
       ) : (
         <FlatList
-          data={sampleData}
+          data={restaurants}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View style={styles.listItem}>
@@ -121,11 +193,16 @@ const styles = StyleSheet.create({
   listItemText: {
     fontSize: 16,
   },
+  loadingText: {
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 16,
+  },
   bottomNavBar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     padding: 15,
-    paddingBottom:50,
+    paddingBottom: 50,
     backgroundColor: '#798B67',
     borderTopWidth: 1,
     borderTopColor: '#ddd',
@@ -142,4 +219,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-

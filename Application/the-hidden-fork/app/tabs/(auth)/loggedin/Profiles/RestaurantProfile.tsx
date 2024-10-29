@@ -35,9 +35,10 @@ export default function RestaurantProfile() {
       if (profileDoc.exists()) {
         const data = profileDoc.data();
         setBusinessName(data.businessName || 'No name set');
-        setRestaurantType(data.restaurantType || ''); // Load restaurant type
+        setRestaurantType(data.restaurantType || ''); 
         setTags(data.tags || []);
         setHours(data.hours || {});
+        setAddress(data.address || '123 Example St, City, State, Zip Code'); 
         setAddress(data.address || 'No address set');
         setProfileImage(data.profileImage || null);
         if (data.address) {
@@ -274,11 +275,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     padding: 15,
+    paddingBottom: 50,
     backgroundColor: '#798B67',
     borderTopWidth: 1,
     borderTopColor: '#ddd',
     position: 'absolute',
-    bottom: 0,
+    bottom: -50,
     width: '100%',
   },
   navButton: {
