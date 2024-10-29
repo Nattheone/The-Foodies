@@ -51,7 +51,7 @@ export default function Login() {
       <View style={styles.innerContainer}>
         {/* Display the PNG Image with resizeMode */}
         <Image
-          source={require('../../../assets/fork_green.png')} // Adjust the path if needed
+          source={require('../../../assets/fork_green.png')} 
           style={styles.logo}
           resizeMode="contain"
         />
@@ -108,8 +108,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F8F8',
   },
   logo: {
-    width: 80, // Adjust width as needed
-    height: 80, // Adjust height as needed
+    width: 80, 
+    height: 80, 
     marginBottom: 20,
   },
   title: {

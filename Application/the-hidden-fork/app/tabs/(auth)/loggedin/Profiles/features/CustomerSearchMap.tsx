@@ -3,13 +3,12 @@ import { getAuth } from 'firebase/auth';
 import { useRouter } from 'expo-router';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { app } from '../../../../../../firebaseConfig';
-import { View, StyleSheet, Text, TouchableOpacity, FlatList, Alert } from 'react-native';
+import { View, StyleSheet, Text, TextInput, TouchableOpacity, FlatList, Alert } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 
 const firestore = getFirestore(app);
 
-// Define a type for a restaurant object
 type Restaurant = {
   id: string;
   name: string;
@@ -21,6 +20,8 @@ type Restaurant = {
 export default function SimpleMapScreen() {
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [filteredRestaurants, setFilteredRestaurants] = useState<Restaurant[]>([]);
+  const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const auth = getAuth(app);
@@ -39,19 +40,18 @@ export default function SimpleMapScreen() {
         const querySnapshot = await getDocs(collection(firestore, 'restaurants'));
         const restaurantData = await Promise.all(querySnapshot.docs.map(async (doc) => {
           const data = doc.data();
-          
-          // Check if address exists to avoid passing undefined to geocodeAsync
           const location = data.address ? await geocodeAddress(data.address) : null;
           
           return {
             id: doc.id,
             name: data.name,
             address: data.address || 'Address not provided',
-            ...location, // include latitude and longitude from geocode if available
+            ...location,
           };
         }));
         
         setRestaurants(restaurantData as Restaurant[]);
+        setFilteredRestaurants(restaurantData as Restaurant[]); 
       } catch (error) {
         console.error("Error loading restaurant data:", error);
         Alert.alert("Error", "Could not load restaurant data.");
@@ -62,6 +62,20 @@ export default function SimpleMapScreen() {
 
     loadRestaurants();
   }, []);
+
+  async function handleSearch() {
+    // Filter restaurants based on the search text
+    const filteredData = restaurants.filter(
+      restaurant => restaurant.name && restaurant.name.toLowerCase().includes(searchText.toLowerCase())
+    );
+    
+    setFilteredRestaurants(filteredData);
+
+
+    if (searchText && filteredData.length === 0) {
+      Alert.alert("No Results", "No restaurants found with that name.");
+    }
+  }
 
   async function geocodeAddress(address: string) {
     try {
@@ -99,6 +113,21 @@ export default function SimpleMapScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Search Bar and Search Button */}
+      {viewMode === 'list' && (
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search by name"
+            value={searchText}
+            onChangeText={setSearchText}
+          />
+          <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+            <Text style={styles.searchButtonText}>Search</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Conditional Rendering for Map or List */}
       {viewMode === 'map' ? (
         loading ? (
@@ -120,6 +149,7 @@ export default function SimpleMapScreen() {
                   }}
                   title={restaurant.name}
                   description={restaurant.address}
+                  pinColor="#798B67"
                 />
               ) : null
             )}
@@ -127,7 +157,7 @@ export default function SimpleMapScreen() {
         )
       ) : (
         <FlatList
-          data={restaurants}
+          data={filteredRestaurants}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View style={styles.listItem}>
@@ -175,6 +205,31 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   activeButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginVertical: 10,
+  },
+  searchInput: {
+    flex: 1,
+    height: 40,
+    borderColor: '#ddd',
+    borderWidth: 1,
+    paddingLeft: 10,
+    borderRadius: 8,
+  },
+  searchButton: {
+    marginLeft: 10,
+    backgroundColor: '#798B67',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+  },
+  searchButtonText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
   },

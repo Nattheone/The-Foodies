@@ -15,7 +15,7 @@ export default function RestaurantProfile() {
   const user = auth.currentUser;
 
   const [businessName, setBusinessName] = useState('');
-  const [restaurantType, setRestaurantType] = useState(''); // State to store type (Restaurant or Food Truck)
+  const [restaurantType, setRestaurantType] = useState(''); 
   const [tags, setTags] = useState<string[]>([]);
   const [hours, setHours] = useState<Record<string, string>>({});
   const [address, setAddress] = useState('');

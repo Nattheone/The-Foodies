@@ -25,10 +25,10 @@ export default function UserTypeSelection() {
     }
 
     try {
-      // Set Firestore collection based on user type
+      
       const collectionName = selectedType === 'Customer' ? 'customers' : 'restaurants';
 
-      // Save the user data in the appropriate collection
+      
       await setDoc(doc(firestore, collectionName, user.uid), {
         uid: user.uid,
         userType: selectedType,
@@ -37,7 +37,7 @@ export default function UserTypeSelection() {
       });
 
       Alert.alert('Success', `Account type set to ${selectedType}.`);
-      router.push('/tabs/(auth)/loggedin/InitalSignUpLoading'); // Navigate to the UserProfile page
+      router.push('/tabs/(auth)/loggedin/InitalSignUpLoading'); 
     } catch (error) {
       console.error('Error saving user type:', error);
       Alert.alert('Error', 'Could not save account type. Please try again.');
@@ -47,7 +47,7 @@ export default function UserTypeSelection() {
   return (
     <View style={styles.container}>
       <Image 
-        source={require('../../../../assets/fork_green.png')} // Replace with your actual path to the icon
+        source={require('../../../../assets/fork_green.png')} 
         style={styles.icon}
         resizeMode="contain"
       />

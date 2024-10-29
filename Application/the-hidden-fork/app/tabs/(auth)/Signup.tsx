@@ -56,9 +56,9 @@ export default function Signup() {
       <View style={styles.innerContainer}>
         {/* Display the PNG Image with resizeMode */}
         <Image 
-          source={require('../../../assets/fork_green.png')} // Assuming this is your image path
+          source={require('../../../assets/fork_green.png')} 
           style={styles.logo} 
-          resizeMode="contain"  // Adjust resizeMode as needed ('cover', 'stretch', etc.)
+          resizeMode="contain"  
         />
 
         <Text style={styles.title}>Sign Up</Text>
@@ -120,8 +120,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F8F8',
   },
   logo: {
-    width: 80,  // Adjust width as needed
-    height: 80, // Adjust height as needed
+    width: 80,  
+    height: 80, 
     marginBottom: 20,
   },
   title: {

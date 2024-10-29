@@ -64,7 +64,6 @@ export default function RestaurantSetting() {
     }
   }
 
-  // Function to resize and compress image
   const compressImage = async (uri: string) => {
     const compressedImage = await ImageManipulator.manipulateAsync(
       uri,
@@ -74,7 +73,6 @@ export default function RestaurantSetting() {
     return compressedImage.uri;
   };
 
-  // Updated pickImage function
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -89,7 +87,6 @@ export default function RestaurantSetting() {
     }
   };
 
-  // Updated uploadImage function to use compressed image
   const uploadImage = async (uri: string) => {
     if (!user) return;
 
