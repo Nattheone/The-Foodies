@@ -98,7 +98,7 @@ export default function SimpleMapScreen() {
 
   const openInMaps = () => {
     if (selectedRestaurant?.latitude && selectedRestaurant?.longitude) {
-      const url = `https://www.google.com/maps/dir/?api=1&destination=${selectedRestaurant.latitude},${selectedRestaurant.longitude}`;
+      const url = `maps://?q=${selectedRestaurant.latitude},${selectedRestaurant.longitude}`;
       Linking.openURL(url);
     } else {
       Alert.alert('Error', 'Location not available');
@@ -134,14 +134,9 @@ export default function SimpleMapScreen() {
         setSearchText(text);
 
         const filteredData = restaurants.filter(restaurant => {
-          // Check if the restaurant has an address
           const hasAddress = !!restaurant.address;
-          
-          // Check if the restaurant's name or tags match the search text
           const nameMatch = restaurant.name && restaurant.name.toLowerCase().includes(text.toLowerCase());
           const tagMatch = restaurant.tags && restaurant.tags.some(tag => tag.toLowerCase().includes(text.toLowerCase()));
-
-          // Only include restaurants that have an address and match either name or tags
           return hasAddress && (nameMatch || tagMatch);
         });
 
@@ -322,13 +317,12 @@ const styles = StyleSheet.create({
   navButton: { alignItems: 'center' },
   navButtonText: { fontSize: 16, color: '#FFFFFF', fontWeight: 'bold' },
 
-  // Modal Styles
   modalContainer: {
     flex: 1,
-    justifyContent: 'flex-start', // Align modal content starting from the top
+    justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    paddingTop: 100,  // Adjust this value to position the modal lower on the screen
+    paddingTop: 100,  
   },
   modalContent: {
     width: '90%',
