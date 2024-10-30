@@ -11,6 +11,8 @@ import { app } from '../../../../../firebaseConfig';
 const firestore = getFirestore(app);
 const storage = getStorage(app);
 
+const daysOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
 export default function RestaurantSetting() {
   const auth = getAuth(app);
   const user = auth.currentUser;
@@ -49,7 +51,11 @@ export default function RestaurantSetting() {
         const data = profileDoc.data();
         setBusinessName(data.businessName || '');
         setAddress(data.address || '');
-        setHours(data.hours || hours);
+        const orderedHours = daysOrder.reduce<Record<string, string>>((acc, day) => {
+          acc[day] = data.hours?.[day] || 'CLOSED';
+          return acc;
+        }, {});
+        setHours(orderedHours);
         setProfileImage(data.profileImage || null);
         setSelectedTags(data.tags || []);
         setRestaurantType(data.restaurantType || 'Restaurant');
@@ -226,7 +232,7 @@ export default function RestaurantSetting() {
         </View>
 
         <Text style={styles.sectionTitle}>Hours of Operation</Text>
-        {Object.keys(hours).map(day => (
+        {daysOrder.map(day => (
           <View key={day} style={styles.hoursInputContainer}>
             <Text style={styles.dayLabel}>{day}</Text>
             <TextInput

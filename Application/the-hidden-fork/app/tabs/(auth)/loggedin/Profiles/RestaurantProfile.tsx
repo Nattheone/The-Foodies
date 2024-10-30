@@ -13,7 +13,7 @@ export default function RestaurantProfile() {
   const router = useRouter();
   const auth = getAuth(app);
   const user = auth.currentUser;
-
+  const daysOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const [businessName, setBusinessName] = useState('');
   const [restaurantType, setRestaurantType] = useState(''); 
   const [tags, setTags] = useState<string[]>([]);
@@ -142,10 +142,10 @@ export default function RestaurantProfile() {
         </TouchableOpacity>
 
         <View style={styles.hoursContainer}>
-          {Object.entries(hours).map(([day, time]) => (
+                {daysOrder.map(day => (
             <View key={day} style={styles.hoursRow}>
               <Text style={styles.day}>{day}</Text>
-              <Text style={styles.time}>{time}</Text>
+              <Text style={styles.time}>{hours[day] || 'CLOSED'}</Text>
             </View>
           ))}
         </View>

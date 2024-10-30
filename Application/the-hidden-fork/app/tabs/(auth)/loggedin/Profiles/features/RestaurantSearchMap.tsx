@@ -3,7 +3,7 @@ import { getAuth } from 'firebase/auth';
 import { useRouter } from 'expo-router';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { app } from '../../../../../../firebaseConfig';
-import { View, StyleSheet, Text, TextInput, TouchableOpacity, FlatList, Alert, Modal, Image, ScrollView, Linking } from 'react-native';
+import { View, StyleSheet, Text, TextInput, TouchableOpacity, FlatList, Alert, Modal, Image, Linking } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 
@@ -21,6 +21,7 @@ type Restaurant = {
 };
 
 export default function SimpleMapScreen() {
+  const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [filteredRestaurants, setFilteredRestaurants] = useState<Restaurant[]>([]);
@@ -30,8 +31,6 @@ export default function SimpleMapScreen() {
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
   const router = useRouter();
   const auth = getAuth(app);
-  const user = auth.currentUser;
-  const daysOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
   const initialRegion = {
     latitude: 33.5779,
@@ -46,22 +45,23 @@ export default function SimpleMapScreen() {
         const querySnapshot = await getDocs(collection(firestore, 'restaurants'));
         const restaurantData = await Promise.all(querySnapshot.docs.map(async (doc) => {
           const data = doc.data();
+          console.log(`Fetched data for restaurant ${doc.id}:`, data); // Logging fetched data to debug
+
           const location = data.address ? await geocodeAddress(data.address) : null;
-          
+
           return {
             id: doc.id,
-            name: data.businessName,
+            name: data.businessName || 'No name provided',
             address: data.address || 'Address not provided',
-            type: data.type || 'Restaurant',
             tags: data.tags || [],
-            hours: data.hours || {},
+            hours: data.hours || {}, // Directly set hours from Firestore data
             profileImage: data.profileImage || '',
             ...location,
           };
         }));
-        
+
         setRestaurants(restaurantData as Restaurant[]);
-        setFilteredRestaurants(restaurantData as Restaurant[]); 
+        setFilteredRestaurants(restaurantData as Restaurant[]);
       } catch (error) {
         console.error("Error loading restaurant data:", error);
         Alert.alert("Error", "Could not load restaurant data.");
@@ -123,100 +123,94 @@ export default function SimpleMapScreen() {
         </TouchableOpacity>
       </View>
 
-{/* Search Bar */}
-{viewMode === 'list' && (
-  <View style={styles.searchContainer}>
-    <TextInput
-      style={styles.searchInput}
-      placeholder="Search by name or tag"
-      value={searchText}
-      onChangeText={text => {
-        setSearchText(text);
+      {/* Search Bar */}
+      {viewMode === 'list' && (
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search by name or tag"
+            value={searchText}
+            onChangeText={text => {
+              setSearchText(text);
+              const filteredData = restaurants.filter(restaurant => {
+                const hasAddress = !!restaurant.address;
+                const nameMatch = restaurant.name && restaurant.name.toLowerCase().includes(text.toLowerCase());
+                const tagMatch = restaurant.tags && restaurant.tags.some(tag => tag.toLowerCase().includes(text.toLowerCase()));
+                return hasAddress && (nameMatch || tagMatch);
+              });
+              setFilteredRestaurants(filteredData);
+            }}
+          />
+        </View>
+      )}
 
-        const filteredData = restaurants.filter(restaurant => {
-          const hasAddress = !!restaurant.address;
-          const nameMatch = restaurant.name && restaurant.name.toLowerCase().includes(text.toLowerCase());
-          const tagMatch = restaurant.tags && restaurant.tags.some(tag => tag.toLowerCase().includes(text.toLowerCase()));
-          return hasAddress && (nameMatch || tagMatch);
-        });
+      {/* Modal for Restaurant Details */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.backButton}>
+              <Text style={styles.backButtonText}>Back</Text>
+            </TouchableOpacity>
 
-        setFilteredRestaurants(filteredData);
-      }}
-    />
-  </View>
-)}
-
-
-
-              {/* Modal for Restaurant Details */}
-        <Modal
-          visible={modalVisible}
-          animationType="slide"
-          transparent={true}
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.backButton}>
-                <Text style={styles.backButtonText}>Back</Text>
-              </TouchableOpacity>
-
-              {selectedRestaurant?.profileImage ? (
-                <Image source={{ uri: selectedRestaurant.profileImage }} style={styles.profileImage} />
-              ) : (
-                <View style={styles.profileImagePlaceholder}>
-                  <Text style={styles.profileImageText}>No Image</Text>
-                </View>
-              )}
-
-              <Text style={styles.modalTitle}>{selectedRestaurant?.name}</Text>
-              
-
-
-              <Text style={styles.tags}>
-        {selectedRestaurant?.tags && selectedRestaurant.tags.length > 0
-          ? `${selectedRestaurant.tags.join(' | ')} | Restaurant`
-          : "Restaurant"}
-      </Text>
-
-
-              {/* Clickable Address */}
-              <TouchableOpacity onPress={openInMaps}>
-                <Text style={styles.modalAddress}>{selectedRestaurant?.address}</Text>
-              </TouchableOpacity>
-
-              {/* Hours - Sorted by Days */}
-              <View style={styles.hoursContainer}>
-                {daysOrder.map((day) => (
-                  <View key={day} style={styles.hoursRow}>
-                    <Text style={styles.day}>{day}</Text>
-                    <Text style={styles.time}>{selectedRestaurant?.hours?.[day] || "Closed"}</Text>
-                  </View>
-                ))}
+            {selectedRestaurant?.profileImage ? (
+              <Image source={{ uri: selectedRestaurant.profileImage }} style={styles.profileImage} />
+            ) : (
+              <View style={styles.profileImagePlaceholder}>
+                <Text style={styles.profileImageText}>No Image</Text>
               </View>
+            )}
 
-              {/* Mini Map */}
-              {selectedRestaurant?.latitude && selectedRestaurant?.longitude && (
-                <MapView
-                  style={styles.miniMap}
-                  initialRegion={{
+            <Text style={styles.modalTitle}>{selectedRestaurant?.name}</Text>
+
+            <Text style={styles.tags}>
+              {selectedRestaurant?.tags && selectedRestaurant.tags.length > 0
+                ? `${selectedRestaurant.tags.join(' | ')} | Restaurant`
+                : "Restaurant"}
+            </Text>
+
+            {/* Clickable Address */}
+            <TouchableOpacity onPress={openInMaps}>
+              <Text style={styles.modalAddress}>{selectedRestaurant?.address}</Text>
+            </TouchableOpacity>
+
+            {/* Hours - Display as is from the database */}
+            <View style={styles.hoursContainer}>
+            {selectedRestaurant?.hours &&
+    daysOfWeek.map((day) => (
+        <View key={day} style={styles.hoursRow}>
+            <Text style={styles.day}>{day}</Text>
+            <Text style={styles.time}>{selectedRestaurant.hours?.[day] || "N/A"}</Text>
+        </View>
+    ))}
+            </View>
+
+            {/* Mini Map */}
+            {selectedRestaurant?.latitude && selectedRestaurant?.longitude && (
+              <MapView
+                style={styles.miniMap}
+                initialRegion={{
+                  latitude: selectedRestaurant.latitude,
+                  longitude: selectedRestaurant.longitude,
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
+                }}
+              >
+                <Marker
+                  coordinate={{
                     latitude: selectedRestaurant.latitude,
                     longitude: selectedRestaurant.longitude,
-                    latitudeDelta: 0.01,
-                    longitudeDelta: 0.01,
                   }}
-                >
-                  <Marker
-                    coordinate={{
-                      latitude: selectedRestaurant.latitude,
-                      longitude: selectedRestaurant.longitude,
-                    }}
-                  />
-                </MapView>
-              )}
-            </View>
+                />
+              </MapView>
+            )}
           </View>
-        </Modal>
+        </View>
+      </Modal>
 
       {/* Conditional Rendering for Map or List */}
       {viewMode === 'map' ? (
@@ -237,46 +231,43 @@ export default function SimpleMapScreen() {
                     latitude: restaurant.latitude,
                     longitude: restaurant.longitude,
                   }}
-                  onPress={() => openModal(restaurant)}  // Open modal on marker press
-                  pinColor="#798B67"
+                  onPress={() => openModal(restaurant)}
+                  pinColor="#0000FF"
                 />
               ) : null
             )}
           </MapView>
         )
       ) : (
-              <FlatList
-        data={filteredRestaurants}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => openModal(item)} style={styles.listItem2}>
-            {/* Profile Image */}
-            {item.profileImage ? (
-              <Image source={{ uri: item.profileImage }} style={styles.profileImage2} />
-            ) : (
-              <View style={styles.profileImagePlaceholder2}>
-                <Text style={styles.profileImageText2}>No Image</Text>
+        <FlatList
+          data={filteredRestaurants}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TouchableOpacity onPress={() => openModal(item)} style={styles.listItem2}>
+              {item.profileImage ? (
+                <Image source={{ uri: item.profileImage }} style={styles.profileImage2} />
+              ) : (
+                <View style={styles.profileImagePlaceholder2}>
+                  <Text style={styles.profileImageText2}>No Image</Text>
+                </View>
+              )}
+              <View style={styles.infoContainer}>
+                <Text style={styles.listItemName}>{item.name}</Text>
+                <Text style={styles.listItemTags}>
+                  {item.tags && item.tags.length > 0 ? item.tags.join(" | ") : "No tags available"}
+                </Text>
               </View>
-            )}
+            </TouchableOpacity>
+          )}
+          ListEmptyComponent={() => (
+            <Text style={styles.noResultsText}>No restaurants found with that name or tag.</Text>
+          )}
+          contentContainerStyle={styles.listContainer}
+        />
+      )}
 
-            {/* Name and Tags */}
-            <View style={styles.infoContainer}>
-              <Text style={styles.listItemName}>{item.name}</Text>
-              <Text style={styles.listItemTags}>
-                {item.tags && item.tags.length > 0 ? item.tags.join(" | ") : "No tags available"}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        )}
-        ListEmptyComponent={() => (
-          <Text style={styles.noResultsText}>No restaurants found with that name or tag.</Text>
-        )}
-        contentContainerStyle={styles.listContainer}
-      />
-    )}
-
- {/* Bottom Navigation Bar */}
- <View style={styles.bottomNavBar}>
+      {/* Bottom Navigation Bar */}
+      <View style={styles.bottomNavBar}>
         <TouchableOpacity style={styles.navButton} onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/RestaurantProfile')}>
           <Text style={styles.navButtonText}>Profile</Text>
         </TouchableOpacity>
@@ -287,6 +278,7 @@ export default function SimpleMapScreen() {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: { flex: 1 },
   toggleContainer: { flexDirection: 'row', justifyContent: 'center', padding: 10, backgroundColor: '#f0f0f0' },
