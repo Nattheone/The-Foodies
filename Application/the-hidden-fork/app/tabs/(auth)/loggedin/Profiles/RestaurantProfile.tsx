@@ -21,6 +21,7 @@ export default function RestaurantProfile() {
   const [address, setAddress] = useState('');
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [coordinates, setCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [status, setStatus] = useState<string>(''); // New state for status
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -41,6 +42,7 @@ export default function RestaurantProfile() {
         setAddress(data.address || '123 Example St, City, State, Zip Code'); 
         setAddress(data.address || 'No address set');
         setProfileImage(data.profileImage || null);
+        setStatus(data.status || 'Unknown'); // Load status from Firestore
         if (data.address) {
           await geocodeAddress(data.address);
         }
@@ -106,7 +108,7 @@ export default function RestaurantProfile() {
         {/* Display Restaurant Type and Tags */}
         {(restaurantType || tags.length > 0) && (
           <Text style={styles.tags}>
-            {[restaurantType, ...tags].filter(Boolean).join(' | ')}
+            {[restaurantType, ...tags, status].filter(Boolean).join(' | ')}
           </Text>
         )}
 

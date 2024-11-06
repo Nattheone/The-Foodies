@@ -3,7 +3,7 @@ import { getAuth } from 'firebase/auth';
 import { useRouter } from 'expo-router';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { app } from '../../../../../../firebaseConfig';
-import { View, StyleSheet, Text, TextInput, TouchableOpacity, FlatList, Alert, Modal, Image, Linking } from 'react-native';
+import { View, StyleSheet, Text, TextInput, TouchableOpacity, FlatList, Alert, Modal, Image, Linking, ScrollView } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 
@@ -18,6 +18,7 @@ type Restaurant = {
   profileImage?: string;
   latitude?: number;
   longitude?: number;
+  status?: 'Busy' | 'Moderate' | 'Slow';
 };
 
 export default function SimpleMapScreen() {
@@ -45,7 +46,6 @@ export default function SimpleMapScreen() {
         const querySnapshot = await getDocs(collection(firestore, 'restaurants'));
         const restaurantData = await Promise.all(querySnapshot.docs.map(async (doc) => {
           const data = doc.data();
-          console.log(`Fetched data for restaurant ${doc.id}:`, data); // Logging fetched data to debug
 
           const location = data.address ? await geocodeAddress(data.address) : null;
 
@@ -54,8 +54,9 @@ export default function SimpleMapScreen() {
             name: data.businessName || 'No name provided',
             address: data.address || 'Address not provided',
             tags: data.tags || [],
-            hours: data.hours || {}, // Directly set hours from Firestore data
+            hours: data.hours || {},
             profileImage: data.profileImage || '',
+            status: data.status || ' ',
             ...location,
           };
         }));
@@ -157,57 +158,61 @@ export default function SimpleMapScreen() {
               <Text style={styles.backButtonText}>Back</Text>
             </TouchableOpacity>
 
-            {selectedRestaurant?.profileImage ? (
-              <Image source={{ uri: selectedRestaurant.profileImage }} style={styles.profileImage} />
-            ) : (
-              <View style={styles.profileImagePlaceholder}>
-                <Text style={styles.profileImageText}>No Image</Text>
+            <ScrollView style={styles.scrollViewContent} contentContainerStyle={styles.scrollContainer}>
+              {selectedRestaurant?.profileImage ? (
+                <Image source={{ uri: selectedRestaurant.profileImage }} style={styles.profileImage} />
+              ) : (
+                <View style={styles.profileImagePlaceholder}>
+                  <Text style={styles.profileImageText}>No Image</Text>
+                </View>
+              )}
+
+              <Text style={styles.modalTitle}>{selectedRestaurant?.name}</Text>
+              {/* Display Restaurant Status */}
+              <Text style={styles.statusText}>{selectedRestaurant?.status || ' '}</Text>
+
+              <Text style={styles.tags}>
+                {selectedRestaurant?.tags && selectedRestaurant.tags.length > 0
+                  ? `${selectedRestaurant.tags.join(' | ')} | Restaurant`
+                  : "Restaurant"}
+              </Text>
+
+              {/* Clickable Address */}
+              <TouchableOpacity onPress={openInMaps}>
+                <Text style={styles.modalAddress}>{selectedRestaurant?.address}</Text>
+              </TouchableOpacity>
+
+              {/* Hours - Display as is from the database */}
+              <View style={styles.hoursContainer}>
+                {selectedRestaurant?.hours &&
+                  daysOfWeek.map((day) => (
+                    <View key={day} style={styles.hoursRow}>
+                      <Text style={styles.day}>{day}</Text>
+                      <Text style={styles.time}>{selectedRestaurant.hours?.[day] || "N/A"}</Text>
+                    </View>
+                  ))}
               </View>
-            )}
 
-            <Text style={styles.modalTitle}>{selectedRestaurant?.name}</Text>
-
-            <Text style={styles.tags}>
-              {selectedRestaurant?.tags && selectedRestaurant.tags.length > 0
-                ? `${selectedRestaurant.tags.join(' | ')} | Restaurant`
-                : "Restaurant"}
-            </Text>
-
-            {/* Clickable Address */}
-            <TouchableOpacity onPress={openInMaps}>
-              <Text style={styles.modalAddress}>{selectedRestaurant?.address}</Text>
-            </TouchableOpacity>
-
-            {/* Hours - Display as is from the database */}
-            <View style={styles.hoursContainer}>
-            {selectedRestaurant?.hours &&
-    daysOfWeek.map((day) => (
-        <View key={day} style={styles.hoursRow}>
-            <Text style={styles.day}>{day}</Text>
-            <Text style={styles.time}>{selectedRestaurant.hours?.[day] || "N/A"}</Text>
-        </View>
-    ))}
-            </View>
-
-            {/* Mini Map */}
-            {selectedRestaurant?.latitude && selectedRestaurant?.longitude && (
-              <MapView
-                style={styles.miniMap}
-                initialRegion={{
-                  latitude: selectedRestaurant.latitude,
-                  longitude: selectedRestaurant.longitude,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-                }}
-              >
-                <Marker
-                  coordinate={{
+              {/* Mini Map */}
+              {selectedRestaurant?.latitude && selectedRestaurant?.longitude && (
+                <MapView
+                  style={styles.miniMap}
+                  initialRegion={{
                     latitude: selectedRestaurant.latitude,
                     longitude: selectedRestaurant.longitude,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
                   }}
-                />
-              </MapView>
-            )}
+                >
+                  <Marker
+                    coordinate={{
+                      latitude: selectedRestaurant.latitude,
+                      longitude: selectedRestaurant.longitude,
+                    }}
+                  />
+                </MapView>
+              )}
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -312,10 +317,9 @@ const styles = StyleSheet.create({
   // Modal Styles
   modalContainer: {
     flex: 1,
-    justifyContent: 'flex-start', // Align modal content starting from the top
+    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    paddingTop: 100,  // Adjust this value to position the modal lower on the screen
   },
   modalContent: {
     width: '90%',
@@ -323,6 +327,11 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: 'white',
     borderRadius: 10,
+  },
+  scrollViewContent: {
+    width: '100%',
+  },
+  scrollContainer: {
     alignItems: 'center',
   },
   backButton: { alignSelf: 'flex-start', marginBottom: 10 },
@@ -332,6 +341,7 @@ const styles = StyleSheet.create({
   profileImageText: { color: '#FFF', fontSize: 16 },
   modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
   tags: { fontSize: 14, color: '#666', marginBottom: 10 },
+  statusText: { fontSize: 16, color: '#333', fontWeight: 'bold', marginVertical: 5 },
   modalAddress: { fontSize: 16, color: '#4A4A4A', textAlign: 'center', marginBottom: 10 },
   hoursContainer: { marginBottom: 10, width: '100%' },
   hoursRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 5 },

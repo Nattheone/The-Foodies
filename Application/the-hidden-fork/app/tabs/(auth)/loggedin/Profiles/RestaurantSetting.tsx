@@ -35,8 +35,9 @@ export default function RestaurantSetting() {
   const [newPassword, setNewPassword] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState<'Busy' | 'Moderate' | 'Slow'>('Moderate');
 
-  const availableTags = ['Family-Friendly', 'Fine Dining', 'Fast Food', 'Casual', 'Barbeque', 'Asian', 'Italian', 'Mexican', 'Indian', 'Dine-In', 'Cafe', 'African'];
+  const availableTags = ['Family-Friendly', 'Fine Dining', 'Fast Food', 'Casual', 'Barbecue', 'Asian', 'Italian', 'Mexican', 'Indian', 'Dine-In', 'Cafe', 'African'];
 
   useEffect(() => {
     if (user) {
@@ -69,6 +70,10 @@ export default function RestaurantSetting() {
       setLoading(false);
     }
   }
+
+  const handleStatusChange = (newStatus: 'Busy' | 'Moderate' | 'Slow') => {
+    setStatus(newStatus);
+  };
 
   const compressImage = async (uri: string) => {
     const compressedImage = await ImageManipulator.manipulateAsync(
@@ -160,6 +165,7 @@ export default function RestaurantSetting() {
         hours,
         restaurantType,
         tags: selectedTags,
+        status,
       }, { merge: true });
 
       if (newPassword) {
@@ -204,6 +210,27 @@ export default function RestaurantSetting() {
             </View>
           )}
         </TouchableOpacity>
+         {/* Status Selection */}
+         <Text style={styles.sectionTitle}>Current Status</Text>
+        <View style={styles.statusContainer}>
+          {['Busy', 'Moderate', 'Slow'].map((statusOption) => (
+            <TouchableOpacity
+              key={statusOption}
+              onPress={() => handleStatusChange(statusOption as 'Busy' | 'Moderate' | 'Slow')}
+              style={[
+                styles.statusButton,
+                status === statusOption && styles.statusButtonSelected,
+              ]}
+            >
+              <Text style={[
+                styles.statusButtonText,
+                status === statusOption && styles.statusButtonTextSelected,
+              ]}>
+                {statusOption}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
         <Text style={styles.label}>Business Name</Text>
         <TextInput
@@ -214,24 +241,18 @@ export default function RestaurantSetting() {
         />
 
         <Text style={styles.label}>Address</Text>
+        <Text style={styles.helperText}>Example: 456 Elm St, Apt 7, New York, NY 10001</Text>
         <TextInput
           style={styles.input}
           value={address}
           onChangeText={setAddress}
-          placeholder="Enter address"
+          placeholder="e.g., 123 Main St, City, State ZIP"
         />
+        
 
-        {/* Toggle for Restaurant Type */}
-        <View style={styles.toggleContainer}>
-          <Text style={styles.toggleLabel}>Restaurant Type</Text>
-          <Switch
-            value={restaurantType === 'Food Truck'}
-            onValueChange={() => setRestaurantType(restaurantType === 'Restaurant' ? 'Food Truck' : 'Restaurant')}
-          />
-          <Text style={styles.toggleOption}>{restaurantType}</Text>
-        </View>
 
         <Text style={styles.sectionTitle}>Hours of Operation</Text>
+        <Text style={styles.helperText}>Example format: "9AM-5PM" or "CLOSED"</Text>
         {daysOrder.map(day => (
           <View key={day} style={styles.hoursInputContainer}>
             <Text style={styles.dayLabel}>{day}</Text>
@@ -245,6 +266,7 @@ export default function RestaurantSetting() {
         ))}
 
         <Text style={styles.sectionTitle}>Select Tags</Text>
+        <Text style={styles.helperText}>Select Only 2</Text>
         <View style={styles.tagContainer}>
           {availableTags.map(tag => (
             <TouchableOpacity
@@ -303,7 +325,35 @@ export default function RestaurantSetting() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  statusContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginVertical: 15,
+  },
+  statusButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#5A6B5C',
+    backgroundColor: '#F8F8F8',
+  },
+  statusButtonSelected: {
+    backgroundColor: '#5A6B5C',
+  },
+  statusButtonText: {
+    fontSize: 16,
+    color: '#5A6B5C',
+  },
+  statusButtonTextSelected: {
+    color: '#FFFFFF',
+  },
+  helperText: {
+    fontSize: 14,
+    color: '#888',
+    marginTop: 5,
+  }
+  ,container: {
     flex: 1,
     backgroundColor: '#F8F8F8',
   },
