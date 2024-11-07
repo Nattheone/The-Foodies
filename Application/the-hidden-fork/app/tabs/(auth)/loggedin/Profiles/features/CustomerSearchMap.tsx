@@ -19,8 +19,14 @@ type Restaurant = {
   latitude?: number;
   longitude?: number;
   status?: 'Busy' | 'Moderate' | 'Slow';
+  events?: Event[];
 };
-
+type Event = {
+  eventName: string;
+  description: string;
+  date: string;
+  discount?: string;
+};
 export default function SimpleMapScreen() {
   const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
@@ -42,13 +48,21 @@ export default function SimpleMapScreen() {
 
   useEffect(() => {
     async function loadRestaurants() {
+      // Request location permission before loading any location-based data
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert("Location Permission Needed", "Please enable location permissions to view restaurant locations.");
+        setLoading(false);
+        return;
+      }
+      
+      // Load restaurants if permission granted
       try {
         const querySnapshot = await getDocs(collection(firestore, 'restaurants'));
         const restaurantData = await Promise.all(querySnapshot.docs.map(async (doc) => {
           const data = doc.data();
-
           const location = data.address ? await geocodeAddress(data.address) : null;
-
+  
           return {
             id: doc.id,
             name: data.businessName || 'No name provided',
@@ -56,11 +70,12 @@ export default function SimpleMapScreen() {
             tags: data.tags || [],
             hours: data.hours || {},
             profileImage: data.profileImage || '',
-            status: data.status || ' ',
+            status: data.status || ' ',            
+            events: data.events || [],
             ...location,
           };
         }));
-
+  
         setRestaurants(restaurantData as Restaurant[]);
         setFilteredRestaurants(restaurantData as Restaurant[]);
       } catch (error) {
@@ -70,7 +85,7 @@ export default function SimpleMapScreen() {
         setLoading(false);
       }
     }
-
+  
     loadRestaurants();
   }, []);
 
@@ -193,6 +208,8 @@ export default function SimpleMapScreen() {
                   ))}
               </View>
 
+
+
               {/* Mini Map */}
               {selectedRestaurant?.latitude && selectedRestaurant?.longitude && (
                 <MapView
@@ -212,12 +229,28 @@ export default function SimpleMapScreen() {
                   />
                 </MapView>
               )}
+                            {/* Events Section */}
+                            <Text style={styles.sectionTitle}>Promotions & Events</Text>
+              <ScrollView horizontal contentContainerStyle={styles.eventsContainer}>
+                {selectedRestaurant?.events?.length ? (
+                  selectedRestaurant.events.map((event, index) => (
+                    <View key={index} style={styles.eventCard}>
+                      <Text style={styles.eventTitle}>{event.eventName}</Text>
+                      <Text style={styles.eventDate}>Date: {event.date}</Text>
+                      <Text style={styles.eventDescription}>{event.description}</Text>
+                      {event.discount && <Text style={styles.eventDiscount}>Discount: {event.discount}</Text>}
+                    </View>
+                  ))
+                ) : (
+                  <Text style={styles.noEventsText}>No events available.</Text>
+                )}
+              </ScrollView>
             </ScrollView>
+            
           </View>
         </View>
       </Modal>
 
-      {/* Conditional Rendering for Map or List */}
       {viewMode === 'map' ? (
         loading ? (
           <Text style={styles.loadingText}>Loading map...</Text>
@@ -270,8 +303,8 @@ export default function SimpleMapScreen() {
           contentContainerStyle={styles.listContainer}
         />
       )}
-      {/* Bottom Navigation Bar */}
-      <View style={styles.bottomNavBar}>
+
+        <View style={styles.bottomNavBar}>
               <TouchableOpacity style={styles.navButton} onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/CustomerProfile')}>
                 <Text style={styles.navButtonText}>Profile</Text>
               </TouchableOpacity>
@@ -279,9 +312,8 @@ export default function SimpleMapScreen() {
                 <Text style={styles.navButtonText}>Search</Text>
               </TouchableOpacity>
             </View>
-          </View>
-        );
-
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -387,5 +419,54 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     fontStyle: 'italic',
+  },sectionTitle: {
+    marginTop: 10,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#5A6B5C',
+    marginBottom: 10,
+  },
+  eventsContainer: {
+    flexDirection: 'row',
+    paddingVertical: 20,
+  },
+  eventCard: {
+    width: 250,
+    height: 250,
+    backgroundColor: '#F9F9F9',
+    borderRadius: 8,
+    padding: 10,
+    marginHorizontal: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  eventTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+  },
+  eventDate: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 5,
+  },
+  eventDescription: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 5,
+  },
+  eventDiscount: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: 'bold',
+  },
+  noEventsText: {
+    color: '#666',
+    fontStyle: 'italic',
+    textAlign: 'center',
   },
 });

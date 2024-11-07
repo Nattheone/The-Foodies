@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert, TouchableOpacity, Linking, Image } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Alert, TouchableOpacity, Linking, Image, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { app } from '../../../../../firebaseConfig';
-
+type Event = {
+  eventName: string;
+  description: string;
+  date: string;
+  discount?: string;
+};
 const firestore = getFirestore(app);
 
 export default function RestaurantProfile() {
@@ -21,7 +26,8 @@ export default function RestaurantProfile() {
   const [address, setAddress] = useState('');
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [coordinates, setCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [status, setStatus] = useState<string>(''); // New state for status
+  const [status, setStatus] = useState<string>(''); 
+  const [events, setEvents] = useState<Event[]>([]); 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,10 +45,11 @@ export default function RestaurantProfile() {
         setRestaurantType(data.restaurantType || ''); 
         setTags(data.tags || []);
         setHours(data.hours || {});
-        setAddress(data.address || '123 Example St, City, State, Zip Code'); 
         setAddress(data.address || 'No address set');
         setProfileImage(data.profileImage || null);
-        setStatus(data.status || 'Unknown'); // Load status from Firestore
+        setStatus(data.status || 'Unknown'); 
+        setEvents(data.events || []); // Load events from Firestore
+
         if (data.address) {
           await geocodeAddress(data.address);
         }
@@ -105,7 +112,6 @@ export default function RestaurantProfile() {
 
         <Text style={styles.name}>{businessName}</Text>
 
-        {/* Display Restaurant Type and Tags */}
         {(restaurantType || tags.length > 0) && (
           <Text style={styles.tags}>
             {[restaurantType, ...tags, status].filter(Boolean).join(' | ')}
@@ -120,38 +126,59 @@ export default function RestaurantProfile() {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.infoCard}>
-        <Text style={styles.sectionTitle}>ADDRESS & HOURS</Text>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.infoCard}>
+          <Text style={styles.sectionTitle}>ADDRESS & HOURS</Text>
 
-        {coordinates ? (
-          <MapView
-            style={styles.map}
-            initialRegion={{
-              latitude: coordinates.latitude,
-              longitude: coordinates.longitude,
-              latitudeDelta: 0.005,
-              longitudeDelta: 0.005,
-            }}
-          >
-            <Marker coordinate={coordinates} title={businessName} description={address} />
-          </MapView>
-        ) : (
-          <Text style={styles.loadingText}>Location not available</Text>
-        )}
+          {coordinates ? (
+            <MapView
+              style={styles.map}
+              initialRegion={{
+                latitude: coordinates.latitude,
+                longitude: coordinates.longitude,
+                latitudeDelta: 0.005,
+                longitudeDelta: 0.005,
+              }}
+            >
+              <Marker coordinate={coordinates} title={businessName} description={address} />
+            </MapView>
+          ) : (
+            <Text style={styles.loadingText}>Location not available</Text>
+          )}
 
-        <TouchableOpacity onPress={openMaps}>
-          <Text style={styles.address}>{address}</Text>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={openMaps}>
+            <Text style={styles.address}>{address}</Text>
+          </TouchableOpacity>
 
-        <View style={styles.hoursContainer}>
-                {daysOrder.map(day => (
-            <View key={day} style={styles.hoursRow}>
-              <Text style={styles.day}>{day}</Text>
-              <Text style={styles.time}>{hours[day] || 'CLOSED'}</Text>
-            </View>
-          ))}
+          <View style={styles.hoursContainer}>
+            {daysOrder.map(day => (
+              <View key={day} style={styles.hoursRow}>
+                <Text style={styles.day}>{day}</Text>
+                <Text style={styles.time}>{hours[day] || 'CLOSED'}</Text>
+              </View>
+            ))}
+          </View>
         </View>
-      </View>
+
+        {/* Promotions & Events Section */}
+        <View style={styles.eventsContainer}>
+          <Text style={styles.sectionTitle}>PROMOTIONS & EVENTS</Text>
+          <ScrollView horizontal contentContainerStyle={styles.eventScroll}>
+            {events.length > 0 ? (
+              events.map((event, index) => (
+                <View key={index} style={styles.eventCard}>
+                  <Text style={styles.eventTitle}>{event.eventName}</Text>
+                  <Text style={styles.eventDate}>Valid Thru {event.date}</Text>
+                  <Text style={styles.eventDescription}>{event.description}</Text>
+                  {event.discount && <Text style={styles.eventDiscount}>Discount: {event.discount}</Text>}
+                </View>
+              ))
+            ) : (
+              <Text style={styles.noEventsText}>No events or promotions available.</Text>
+            )}
+          </ScrollView>
+        </View>
+      </ScrollView>
 
       <View style={styles.bottomNavBar}>
         <TouchableOpacity style={styles.navButton} onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/RestaurantProfile')}>
@@ -224,6 +251,9 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 18,
   },
+  scrollContent: {
+    paddingBottom: 80,
+  },
   infoCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -271,10 +301,53 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#4A4A4A',
   },
-  loadingText: {
+  eventsContainer: {
     marginTop: 20,
-    fontSize: 16,
+    paddingHorizontal: 20,
+  },
+  eventScroll: {
+    flexDirection: 'row',
+    paddingVertical: 10,
+  },
+  eventCard: {
+    width: 180,
+    height: 190,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    padding: 15,
+    marginRight: 10,
+    backgroundColor: '#FFFFFF',
+  },
+  eventTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#5A6B5C',
+    marginBottom: 15,
+    textAlign: 'center'
+  },
+  eventDate: {
+    fontSize: 14,
     color: '#4A4A4A',
+    marginBottom: 5,
+    textAlign:'center'
+  },
+  eventDescription: {
+    fontSize: 14,
+    color: '#4A4A4A',
+    marginBottom: 5,
+    textAlign:'center'
+
+  },
+  eventDiscount: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#798B67',
+    textAlign:'center'
+  },
+  noEventsText: {
+    fontSize: 14,
+    color: '#999',
   },
   bottomNavBar: {
     flexDirection: 'row',
@@ -295,5 +368,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#FFFFFF',
     fontWeight: 'bold',
+  },  
+  loadingText: { // Add this style for loading text
+    marginTop: 20,
+    fontSize: 16,
+    color: '#4A4A4A',
+    textAlign: 'center',
   },
 });

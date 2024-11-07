@@ -24,8 +24,8 @@ export default function GetStarted() {
           style={styles.forkImage}
           contentFit="contain"
         />
-
-        <Text style={styles.title}>DISCOVER & ENJOY</Text>
+        <Text style={styles.title}>THE HIDDEN FORK</Text>
+        <Text style={styles.titlesub}>DISCOVER & ENJOY</Text>
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
@@ -76,6 +76,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24 * (width / 320), // Scale font size
+    color: 'white',
+    marginBottom: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },  
+  titlesub: {
+    fontSize: 18 * (width / 320), // Scale font size
     color: 'white',
     marginBottom: 20,
     fontWeight: 'bold',

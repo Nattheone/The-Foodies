@@ -59,20 +59,22 @@ export default function CreateEventScreen() {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.formContainer}>
           <Text style={styles.title}>Create Event or Promotion</Text>
-
+          
           <TextInput
             style={styles.input}
-            placeholder="Event Name"
+            placeholder="Event Name (e.g., Taco Tuesday Special)"
             value={eventName}
             onChangeText={setEventName}
           />
+          
           <TextInput
             style={[styles.input, styles.multilineInput]}
-            placeholder="Description"
+            placeholder="Description & Conditions(e.g., 20% off all tacos on Tuesdays! or Coupon Present at Checkout)"
             value={description}
             onChangeText={setDescription}
             multiline
           />
+          <Text style={styles.helperText}>Date format: YYYY-MM-DD (e.g., 2024-05-15)</Text>
           <TextInput
             style={styles.input}
             placeholder="Date (e.g., YYYY-MM-DD)"
@@ -81,7 +83,7 @@ export default function CreateEventScreen() {
           />
           <TextInput
             style={styles.input}
-            placeholder="Discount (optional)"
+            placeholder="Discount Code (optional)"
             value={discount}
             onChangeText={setDiscount}
           />
@@ -89,7 +91,13 @@ export default function CreateEventScreen() {
           <TouchableOpacity style={styles.button} onPress={handleCreateEvent}>
             <Text style={styles.buttonText}>Create Event</Text>
           </TouchableOpacity>
+
+          
+
         </View>
+        <TouchableOpacity style={styles.viewEventsButton} onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/features/eventmanagement')}>
+            <Text style={styles.viewEventsButtonText}>View All Events</Text>
+          </TouchableOpacity> 
       </ScrollView>
 
       {/* Bottom Navigation */}
@@ -109,6 +117,19 @@ export default function CreateEventScreen() {
 }
 
 const styles = StyleSheet.create({
+  viewEventsButton: {
+    backgroundColor: '#5A6B5C',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 20,
+    width: '80%',
+  },
+  viewEventsButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   container: {
     flex: 1,
     backgroundColor: '#F8F8F8',
@@ -183,5 +204,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#FFFFFF',
     fontWeight: 'bold',
+  },  
+  helperText: {
+    fontSize: 14,
+    color: '#888',
+    marginTop: 5,
   },
 });

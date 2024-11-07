@@ -19,8 +19,14 @@ type Restaurant = {
   latitude?: number;
   longitude?: number;
   status?: 'Busy' | 'Moderate' | 'Slow';
+  events?: Event[];
 };
-
+type Event = {
+  eventName: string;
+  description: string;
+  date: string;
+  discount?: string;
+};
 export default function SimpleMapScreen() {
   const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
@@ -42,13 +48,21 @@ export default function SimpleMapScreen() {
 
   useEffect(() => {
     async function loadRestaurants() {
+      // Request location permission before loading any location-based data
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert("Location Permission Needed", "Please enable location permissions to view restaurant locations.");
+        setLoading(false);
+        return;
+      }
+      
+      // Load restaurants if permission granted
       try {
         const querySnapshot = await getDocs(collection(firestore, 'restaurants'));
         const restaurantData = await Promise.all(querySnapshot.docs.map(async (doc) => {
           const data = doc.data();
-
           const location = data.address ? await geocodeAddress(data.address) : null;
-
+  
           return {
             id: doc.id,
             name: data.businessName || 'No name provided',
@@ -57,10 +71,11 @@ export default function SimpleMapScreen() {
             hours: data.hours || {},
             profileImage: data.profileImage || '',
             status: data.status || ' ',
+            events: data.events || [],
             ...location,
           };
         }));
-
+  
         setRestaurants(restaurantData as Restaurant[]);
         setFilteredRestaurants(restaurantData as Restaurant[]);
       } catch (error) {
@@ -70,7 +85,7 @@ export default function SimpleMapScreen() {
         setLoading(false);
       }
     }
-
+  
     loadRestaurants();
   }, []);
 
@@ -193,6 +208,8 @@ export default function SimpleMapScreen() {
                   ))}
               </View>
 
+
+
               {/* Mini Map */}
               {selectedRestaurant?.latitude && selectedRestaurant?.longitude && (
                 <MapView
@@ -212,7 +229,24 @@ export default function SimpleMapScreen() {
                   />
                 </MapView>
               )}
+                            {/* Events Section */}
+                            <Text style={styles.sectionTitle}>Promotions & Events</Text>
+              <ScrollView horizontal contentContainerStyle={styles.eventsContainer}>
+                {selectedRestaurant?.events?.length ? (
+                  selectedRestaurant.events.map((event, index) => (
+                    <View key={index} style={styles.eventCard}>
+                      <Text style={styles.eventTitle}>{event.eventName}</Text>
+                      <Text style={styles.eventDescription}>{event.description}</Text>
+                      <Text style={styles.eventDate}>Date: {event.date}</Text>
+                      {event.discount && <Text style={styles.eventDiscount}>Discount: {event.discount}</Text>}
+                    </View>
+                  ))
+                ) : (
+                  <Text style={styles.noEventsText}>No events available.</Text>
+                )}
+              </ScrollView>
             </ScrollView>
+            
           </View>
         </View>
       </Modal>
@@ -390,5 +424,60 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     fontStyle: 'italic',
+  },
+  sectionTitle: {
+    marginTop: 10,
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'left',
+    color: '#333'
+
+  },
+  eventsContainer: {
+    flexDirection: 'row',
+    paddingVertical: 10,
+  },
+  eventCard: {
+    width: 200,
+    backgroundColor: '#F9F9F9',
+    borderRadius: 8,
+    padding: 10,
+    marginHorizontal: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  eventTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#5A6B5C',
+    marginBottom: 15,
+    textAlign: 'center'
+  },
+  eventDate: {
+    fontSize: 14,
+    color: '#4A4A4A',
+    marginBottom: 5,
+    textAlign:'center'
+  },
+  eventDescription: {
+    fontSize: 14,
+    color: '#4A4A4A',
+    marginBottom: 5,
+    textAlign:'center'
+
+  },
+  eventDiscount: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#798B67',
+    textAlign:'center'
+  },
+  noEventsText: {
+    fontSize: 14,
+    color: '#999',
   },
 });
