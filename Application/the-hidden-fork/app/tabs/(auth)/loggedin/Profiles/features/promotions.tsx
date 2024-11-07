@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { getFirestore, doc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 import { app } from '../../../../../../firebaseConfig';
 import { useRouter } from 'expo-router';
 
 const firestore = getFirestore(app);
+const auth = getAuth(app);
 
 export default function CreateEventScreen() {
   const [eventName, setEventName] = useState('');
@@ -14,19 +16,32 @@ export default function CreateEventScreen() {
   const router = useRouter();
 
   const handleCreateEvent = async () => {
+    const user = auth.currentUser;
+    if (!user) {
+      Alert.alert("Error", "You must be logged in to create an event.");
+      return;
+    }
+
     if (!eventName || !description || !date) {
       Alert.alert("Error", "Please fill out all fields.");
       return;
     }
 
     try {
-      await addDoc(collection(firestore, 'events'), {
-        eventName,
-        description,
-        date,
-        discount,
-        createdAt: new Date(),
+      // Reference to the user's restaurant document
+      const restaurantDocRef = doc(firestore, 'restaurants', user.uid);
+
+      // Add the event to the `events` array field
+      await updateDoc(restaurantDocRef, {
+        events: arrayUnion({
+          eventName,
+          description,
+          date,
+          discount,
+          createdAt: new Date(),
+        }),
       });
+
       Alert.alert("Success", "Event created successfully!");
       router.back(); // Navigate back after creation
     } catch (error) {
@@ -170,4 +185,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-
