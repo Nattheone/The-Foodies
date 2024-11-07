@@ -157,6 +157,9 @@ export default function RestaurantProfile() {
         <TouchableOpacity style={styles.navButton} onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/RestaurantProfile')}>
           <Text style={styles.navButtonText}>Profile</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.navButton} onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/features/promotions')}>
+          <Text style={styles.navButtonText}>Events</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.navButton} onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/features/RestaurantSearchMap')}>
           <Text style={styles.navButtonText}>Search</Text>
         </TouchableOpacity>
