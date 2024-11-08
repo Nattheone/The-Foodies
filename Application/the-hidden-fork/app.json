@@ -1,7 +1,8 @@
 {
   "expo": {
-    "name": "the-hidden-fork",
+    "name": "the hidden fork",
     "slug": "the-hidden-fork",
+    "icon": "./assets/icon.png",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
