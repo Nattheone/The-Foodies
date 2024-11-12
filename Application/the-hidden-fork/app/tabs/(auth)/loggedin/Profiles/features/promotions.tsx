@@ -63,6 +63,7 @@ export default function CreateEventScreen() {
           <TextInput
             style={styles.input}
             placeholder="Event Name (e.g., Taco Tuesday Special)"
+            placeholderTextColor={"#888"}
             value={eventName}
             onChangeText={setEventName}
           />
@@ -72,18 +73,22 @@ export default function CreateEventScreen() {
             placeholder="Description & Conditions(e.g., 20% off all tacos on Tuesdays! or Coupon Present at Checkout)"
             value={description}
             onChangeText={setDescription}
+            placeholderTextColor={"#888"}
+
             multiline
           />
           <Text style={styles.helperText}>Date format: YYYY-MM-DD (e.g., 2024-05-15)</Text>
           <TextInput
             style={styles.input}
             placeholder="Date (e.g., YYYY-MM-DD)"
+            placeholderTextColor={"#888"}
             value={date}
             onChangeText={setDate}
           />
           <TextInput
             style={styles.input}
             placeholder="Discount Code (optional)"
+            placeholderTextColor={"#888"}
             value={discount}
             onChangeText={setDiscount}
           />

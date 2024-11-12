@@ -145,6 +145,7 @@ export default function SimpleMapScreen() {
           <TextInput
             style={styles.searchInput}
             placeholder="Search by name or tag"
+            placeholderTextColor={"#888"}
             value={searchText}
             onChangeText={text => {
               setSearchText(text);
@@ -322,14 +323,15 @@ export default function SimpleMapScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  toggleContainer: { flexDirection: 'row', justifyContent: 'center', padding: 10, backgroundColor: '#f0f0f0' },
+  container: { flex: 1,     backgroundColor: '#FFFFFF' 
+  },
+  toggleContainer: { flexDirection: 'row', justifyContent: 'center', padding: 10, backgroundColor: '#f0f0f0', },
   toggleButton: { flex: 1, paddingVertical: 10, alignItems: 'center', backgroundColor: '#d3d3d3' },
   activeButton: { backgroundColor: '#798B67' },
   toggleButtonText: { fontSize: 16, color: '#000' },
   activeButtonText: { color: '#FFFFFF', fontWeight: 'bold' },
   searchContainer: { paddingHorizontal: 20, marginVertical: 10 },
-  searchInput: { height: 40, borderColor: '#ddd', borderWidth: 1, paddingLeft: 10, borderRadius: 8 },
+  searchInput: { height: 40, borderColor: '#ddd', borderWidth: 1, paddingLeft: 10, borderRadius: 8, backgroundColor: '#FFFFFF', color: '#4A4A4A', },
   map: { width: '100%', height: '100%' },
   listContainer: { paddingTop: 10 },
   listItem: { padding: 15, borderBottomWidth: 1, borderBottomColor: '#ddd' },

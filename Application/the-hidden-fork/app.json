@@ -3,7 +3,7 @@
     "name": "the hidden fork",
     "slug": "the-hidden-fork",
     "icon": "./assets/icon.png",
-    "version": "6.0.0",
+    "version": "7.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "scheme": "yourappscheme",  

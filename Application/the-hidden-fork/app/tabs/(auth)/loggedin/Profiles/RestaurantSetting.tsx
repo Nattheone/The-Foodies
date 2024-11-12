@@ -238,6 +238,7 @@ export default function RestaurantSetting() {
           value={businessName}
           onChangeText={setBusinessName}
           placeholder="Enter business name"
+          placeholderTextColor={"#888"}
         />
 
         <Text style={styles.label}>Address</Text>
@@ -247,6 +248,8 @@ export default function RestaurantSetting() {
           value={address}
           onChangeText={setAddress}
           placeholder="e.g., 123 Main St, City, State ZIP"
+          placeholderTextColor={"#888"}
+
         />
         
 
@@ -261,6 +264,8 @@ export default function RestaurantSetting() {
               value={hours[day]}
               onChangeText={(value) => handleHourChange(day, value)}
               placeholder="e.g., 9AM-6PM or CLOSED"
+              placeholderTextColor={"#888"}
+
             />
           </View>
         ))}
@@ -298,6 +303,7 @@ export default function RestaurantSetting() {
           value={currentPassword}
           onChangeText={setCurrentPassword}
           placeholder="Enter current password"
+          placeholderTextColor={"#888"}
           secureTextEntry
         />
 
@@ -307,6 +313,7 @@ export default function RestaurantSetting() {
           value={newPassword}
           onChangeText={setNewPassword}
           placeholder="Enter new password"
+          placeholderTextColor={"#888"}
           secureTextEntry
         />
 
@@ -403,7 +410,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     backgroundColor: '#FFFFFF',
-    color: '#333',
+    color: '#4A4A4A',
     marginTop: 5,
   },
   nonEditableText: {
@@ -451,7 +458,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     backgroundColor: '#FFFFFF',
-    color: '#333',
+    color: '#4A4A4A',
     marginLeft: 10,
   },
   tagContainer: {

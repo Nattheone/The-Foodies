@@ -160,6 +160,7 @@ export default function CustomerSetting() {
           placeholder="Name"
           value={name}
           onChangeText={setName}
+          placeholderTextColor={"#888"}
           autoCapitalize="words"
         />
 
@@ -172,6 +173,7 @@ export default function CustomerSetting() {
           placeholder="New Password"
           value={password}
           onChangeText={setPassword}
+          placeholderTextColor={"#888"}
           secureTextEntry
         />
         <Text style={styles.label}>Current Password</Text>
@@ -180,6 +182,7 @@ export default function CustomerSetting() {
           placeholder="Current Password (required to update password)"
           value={currentPassword}
           onChangeText={setCurrentPassword}
+          placeholderTextColor={"#888"}
           secureTextEntry
         />
 
