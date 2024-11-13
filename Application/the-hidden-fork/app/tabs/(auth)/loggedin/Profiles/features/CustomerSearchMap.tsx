@@ -70,7 +70,7 @@ export default function SimpleMapScreen() {
             tags: data.tags || [],
             hours: data.hours || {},
             profileImage: data.profileImage || '',
-            status: data.status || ' ',            
+            status: data.status || ' ',
             events: data.events || [],
             ...location,
           };
@@ -237,8 +237,8 @@ export default function SimpleMapScreen() {
                   selectedRestaurant.events.map((event, index) => (
                     <View key={index} style={styles.eventCard}>
                       <Text style={styles.eventTitle}>{event.eventName}</Text>
-                      <Text style={styles.eventDate}>Date: {event.date}</Text>
                       <Text style={styles.eventDescription}>{event.description}</Text>
+                      <Text style={styles.eventDate}>Date: {event.date}</Text>
                       {event.discount && <Text style={styles.eventDiscount}>Discount: {event.discount}</Text>}
                     </View>
                   ))
@@ -252,6 +252,7 @@ export default function SimpleMapScreen() {
         </View>
       </Modal>
 
+      {/* Conditional Rendering for Map or List */}
       {viewMode === 'map' ? (
         loading ? (
           <Text style={styles.loadingText}>Loading map...</Text>
@@ -305,7 +306,7 @@ export default function SimpleMapScreen() {
         />
       )}
 
-        <View style={styles.bottomNavBar}>
+<View style={styles.bottomNavBar}>
               <TouchableOpacity style={styles.navButton} onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/CustomerProfile')}>
                 <Text style={styles.navButtonText}>Profile</Text>
               </TouchableOpacity>
