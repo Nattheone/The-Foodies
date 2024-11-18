@@ -5,13 +5,16 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import {app} from '../../../../firebaseConfig';
 
+//initializes firestore
 const firestore = getFirestore(app);
 
+//default components for Loading screen 
 export default function InitialSignUpLoading() {
   const router = useRouter();
   const auth = getAuth(app);
   const user = auth.currentUser;
 
+  // Effect hook to check the user type after the component mounts
   useEffect(() => {
     if (user) {
       checkUserType(user.uid); 
@@ -21,23 +24,24 @@ export default function InitialSignUpLoading() {
     }
   }, [user]);
 
+  // Function to check the users type
   async function checkUserType(userId: string) {
     try {
-      
+      //if customer
       const customerDoc = await getDoc(doc(firestore, 'customers', userId));
       if (customerDoc.exists()) {
-         router.replace('/tabs/(auth)/loggedin/Profiles/CustomerProfile'); // Navigate to customer profile setup
+         router.replace('/tabs/(auth)/loggedin/Profiles/CustomerProfile');
         return;
       }
 
-      
+      //if restaurant 
       const restaurantDoc = await getDoc(doc(firestore, 'restaurants', userId));
       if (restaurantDoc.exists()) {
         router.replace('/tabs/(auth)/loggedin/Profiles/RestaurantProfile'); 
         return;
       }
 
-     
+     //if none
       Alert.alert('Error', 'User type not found. Please log in again.');
       router.replace('/tabs/Login');
     } catch (error) {
@@ -46,7 +50,7 @@ export default function InitialSignUpLoading() {
       router.replace('/tabs/Login');
     }
   }
-
+{/* Legit Just loading screen   */}
   return (
     <View style={styles.container}>
       <ActivityIndicator size="large" color="#5A6B5C" />
@@ -54,7 +58,7 @@ export default function InitialSignUpLoading() {
     </View>
   );
 }
-
+{/* style for frontend */}
 const styles = StyleSheet.create({
   container: {
     flex: 1,

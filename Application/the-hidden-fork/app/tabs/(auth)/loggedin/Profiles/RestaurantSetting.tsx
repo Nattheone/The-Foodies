@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, Platform, Image, Switch } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { getAuth, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -8,11 +8,14 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import { useRouter } from 'expo-router';
 import { app } from '../../../../../firebaseConfig';
 
+//initializes firestore and storage for pictures 
 const firestore = getFirestore(app);
 const storage = getStorage(app);
 
+//days of week in order
 const daysOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+//default components and definitions 
 export default function RestaurantSetting() {
   const auth = getAuth(app);
   const user = auth.currentUser;
@@ -39,12 +42,14 @@ export default function RestaurantSetting() {
 
   const availableTags = ['Family-Friendly', 'Fine Dining', 'Fast Food', 'Casual', 'Barbecue', 'Asian', 'Italian', 'Mexican', 'Indian', 'Dine-In', 'Cafe', 'African'];
 
+  //loading screen to featch users settings 
   useEffect(() => {
     if (user) {
       loadSettings(user.uid);
     }
   }, [user]);
 
+  // Function to load restaurant settings from Firestore
   async function loadSettings(userId: string) {
     try {
       const profileDoc = await getDoc(doc(firestore, 'restaurants', userId));
@@ -71,19 +76,22 @@ export default function RestaurantSetting() {
     }
   }
 
+  //for status changes 
   const handleStatusChange = (newStatus: 'Busy' | 'Moderate' | 'Slow') => {
     setStatus(newStatus);
   };
 
+  //this compresses the images into a url to save into firebase storage
   const compressImage = async (uri: string) => {
     const compressedImage = await ImageManipulator.manipulateAsync(
       uri,
-      [{ resize: { width: 1024 } }], // Resize to max width of 1024px
-      { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG } // Compress to 70% quality
+      [{ resize: { width: 1024 } }],
+      { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG } 
     );
     return compressedImage.uri;
   };
 
+  //image picker to allow users to select a profile pic
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -94,10 +102,11 @@ export default function RestaurantSetting() {
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
       const compressedUri = await compressImage(result.assets[0].uri);
-      uploadImage(compressedUri); // Use the compressed image URI for upload
+      uploadImage(compressedUri);
     }
   };
 
+  //upadates the profile image to storage and the settings in firestore for the image url
   const uploadImage = async (uri: string) => {
     if (!user) return;
 
@@ -123,6 +132,7 @@ export default function RestaurantSetting() {
     }
   };
 
+  //for tag selections 
   const handleTagSelect = (tag: string) => {
     if (selectedTags.includes(tag)) {
       setSelectedTags(selectedTags.filter(selected => selected !== tag));
@@ -131,10 +141,12 @@ export default function RestaurantSetting() {
     }
   };
 
+  //updates the horus for that specific dat that was changed 
   const handleHourChange = (day: string, value: string) => {
     setHours(prevHours => ({ ...prevHours, [day]: value }));
   };
 
+  //for reseting password 
   async function reauthenticateUser() {
     if (!user || !currentPassword) return false;
 
@@ -150,6 +162,7 @@ export default function RestaurantSetting() {
     }
   }
 
+  //saves the settings and updates the passsword if needed
   async function saveSettings() {
     if (!user) return;
 
@@ -180,6 +193,7 @@ export default function RestaurantSetting() {
     }
   }
 
+  //cancels and goes back to profile 
   const cancelChanges = () => {
     router.back();
   };
@@ -201,6 +215,7 @@ export default function RestaurantSetting() {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.title}>Edit Restaurant Profile</Text>
 
+        {/* Profile Pic selection*/}
         <TouchableOpacity onPress={pickImage}>
           {profileImage ? (
             <Image source={{ uri: profileImage }} style={styles.profilePicture} />
@@ -231,7 +246,7 @@ export default function RestaurantSetting() {
             </TouchableOpacity>
           ))}
         </View>
-
+          {/* Business Name Input  */}
         <Text style={styles.label}>Business Name</Text>
         <TextInput
           style={styles.input}
@@ -240,7 +255,7 @@ export default function RestaurantSetting() {
           placeholder="Enter business name"
           placeholderTextColor={"#888"}
         />
-
+        {/* Address Input  */}
         <Text style={styles.label}>Address</Text>
         <Text style={styles.helperText}>Example: 456 Elm St, Apt 7, New York, NY 10001</Text>
         <TextInput
@@ -253,7 +268,7 @@ export default function RestaurantSetting() {
         />
         
 
-
+          {/* Hours Of Operation inputs */}
         <Text style={styles.sectionTitle}>Hours of Operation</Text>
         <Text style={styles.helperText}>Example format: "9AM-5PM" or "CLOSED"</Text>
         {daysOrder.map(day => (
@@ -269,7 +284,7 @@ export default function RestaurantSetting() {
             />
           </View>
         ))}
-
+        {/* Tag Selection MAX 2 for now  */}
         <Text style={styles.sectionTitle}>Select Tags</Text>
         <Text style={styles.helperText}>Select Only 2</Text>
         <View style={styles.tagContainer}>
@@ -293,7 +308,7 @@ export default function RestaurantSetting() {
             </TouchableOpacity>
           ))}
         </View>
-
+          {/* Shows Users current email DOESNT NOT CHANGE IT FOR NOW  */}
         <Text style={styles.label}>Email</Text>
         <Text style={styles.nonEditableText}>{user?.email}</Text>
 

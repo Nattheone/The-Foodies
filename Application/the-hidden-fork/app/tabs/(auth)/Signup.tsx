@@ -15,6 +15,7 @@ import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
 import { useRouter } from 'expo-router';
 import {app} from '../../../firebaseConfig';
 
+// signup components
 export default function Signup() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -22,6 +23,7 @@ export default function Signup() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  //functions for singup/registreration includes error messages 
   async function registerUser() {
     if (!email || !password) {
       Alert.alert('Validation Error', 'Please fill all required fields.');
@@ -37,11 +39,11 @@ export default function Signup() {
 
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      Alert.alert('Success', 'Account created successfully. Please log in.', [
+      Alert.alert('Success', 'Account created successfully.', [
         { text: 'Okay', onPress: () => router.push('/tabs/(auth)/loggedin/UserSelection') },
       ]);
     } catch (error: any) {
-      Alert.alert('Something went wrong', error.message);
+      Alert.alert('Something went wrong!', error.message);
     } finally {
       setLoading(false);
     }
@@ -54,7 +56,7 @@ export default function Signup() {
       keyboardVerticalOffset={80}
     >
       <View style={styles.innerContainer}>
-        {/* Display the PNG Image with resizeMode */}
+        {/* The fork images */}
         <Image 
           source={require('../../../assets/fork_green.png')} 
           style={styles.logo} 
@@ -62,7 +64,7 @@ export default function Signup() {
         />
 
         <Text style={styles.title}>Sign Up</Text>
-
+        {/* Email Input */}
         <TextInput
           style={styles.input}
           placeholder="Email"
@@ -71,6 +73,7 @@ export default function Signup() {
           keyboardType="email-address"
           autoCapitalize="none"
         />
+         {/* Password iNput */}
         <TextInput
           style={[styles.input, { marginTop: 15 }]}
           placeholder="Password"
@@ -78,6 +81,7 @@ export default function Signup() {
           onChangeText={setPassword}
           secureTextEntry
         />
+         {/* Confirm Password Input */}
         <TextInput
           style={[styles.input, { marginTop: 15 }]}
           placeholder="Confirm Password"
@@ -85,7 +89,7 @@ export default function Signup() {
           onChangeText={setConfirmPassword}
           secureTextEntry
         />
-
+         {/* Register Button*/}
         <TouchableOpacity style={styles.button} onPress={registerUser}>
           {loading ? (
             <ActivityIndicator size="small" color="white" />
@@ -108,6 +112,7 @@ export default function Signup() {
   );
 }
 
+ {/* Style for the frontend */}
 const styles = StyleSheet.create({
   container: {
     flex: 1,

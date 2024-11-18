@@ -15,6 +15,7 @@ import { signInWithEmailAndPassword, getAuth } from 'firebase/auth';
 import { useRouter } from 'expo-router';
 import {app} from '../../../firebaseConfig';
 
+//defult components for Login 
 export default function Login() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -36,7 +37,7 @@ export default function Login() {
         { text: 'Okay', onPress: () => router.push('/tabs/(auth)/loggedin/InitalSignUpLoading') },
       ]);
     } catch (error: any) {
-      Alert.alert('Something went wrong', error.message);
+      Alert.alert('Something went wrong!', error.message);
     } finally {
       setLoading(false);
     }
@@ -48,6 +49,7 @@ export default function Login() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={80}
     >
+       {/* The fork image */}
       <View style={styles.innerContainer}>
         {/* Display the PNG Image with resizeMode */}
         <Image
@@ -57,7 +59,7 @@ export default function Login() {
         />
 
         <Text style={styles.title}>Login</Text>
-
+       {/* email input */}
         <TextInput
           style={styles.input}
           placeholder="Email"
@@ -66,6 +68,7 @@ export default function Login() {
           keyboardType="email-address"
           autoCapitalize="none"
         />
+         {/* password input */}
         <TextInput
           style={[styles.input, { marginTop: 15 }]}
           placeholder="Password"
@@ -73,7 +76,7 @@ export default function Login() {
           onChangeText={setPassword}
           secureTextEntry
         />
-
+         {/* Login Button */}
         <TouchableOpacity style={styles.button} onPress={handleLogin}>
           {loading ? (
             <ActivityIndicator size="small" color="white" />
@@ -81,7 +84,7 @@ export default function Login() {
             <Text style={styles.buttonText}>Login</Text>
           )}
         </TouchableOpacity>
-
+           {/* Dont Have an account action */}
         <View style={styles.register}>
           <Text style={styles.link}>Don't have an account? </Text>
           <Text
@@ -95,7 +98,7 @@ export default function Login() {
     </KeyboardAvoidingView>
   );
 }
-
+ {/* styles for frontend */}
 const styles = StyleSheet.create({
   container: {
     flex: 1,

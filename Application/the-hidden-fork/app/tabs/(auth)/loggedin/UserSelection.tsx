@@ -5,8 +5,10 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 import {app} from '../../../../firebaseConfig';
 
+//start the firestore 
 const firestore = getFirestore(app);
 
+//defualt compononets for the UserSelection
 export default function UserTypeSelection() {
   const router = useRouter();
   const auth = getAuth(app);
@@ -14,6 +16,7 @@ export default function UserTypeSelection() {
 
   const [selectedType, setSelectedType] = useState('');
 
+  //function for hanfling user selection with error handling 
   async function handleConfirm() {
     if (!selectedType) {
       Alert.alert('Please select a user type');
@@ -46,15 +49,16 @@ export default function UserTypeSelection() {
 
   return (
     <View style={styles.container}>
+      {/* The fork image */}
       <Image 
         source={require('../../../../assets/fork_green.png')} 
         style={styles.icon}
         resizeMode="contain"
       />
-      
+      {/* Question for the type of user  */}
       <Text style={styles.title}>Which Type of User Are You?</Text>
       <Text style={styles.note}>NOTE: ONCE SELECTED CANNOT CHANGE</Text>
-
+      {/* Restaurant Selection  */}
       <TouchableOpacity
         style={[styles.optionButton, selectedType === 'Restaurant' && styles.selectedButton]}
         onPress={() => setSelectedType('Restaurant')}
@@ -64,7 +68,7 @@ export default function UserTypeSelection() {
           Looking to expand my business. For Restaurants and Food Trucks only.
         </Text>
       </TouchableOpacity>
-
+    {/* Customer Selection  */}
       <TouchableOpacity
         style={[styles.optionButton, selectedType === 'Customer' && styles.selectedButton]}
         onPress={() => setSelectedType('Customer')}
@@ -74,14 +78,14 @@ export default function UserTypeSelection() {
           Looking to expand my palette and support local businesses.
         </Text>
       </TouchableOpacity>
-
+{/* Confirmation button   */}
       <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
         <Text style={styles.confirmButtonText}>Confirm</Text>
       </TouchableOpacity>
     </View>
   );
 }
-
+{/*styles for frontend  */}
 const styles = StyleSheet.create({
   container: {
     flex: 1,
