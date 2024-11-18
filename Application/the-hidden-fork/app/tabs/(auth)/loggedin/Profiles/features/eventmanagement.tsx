@@ -8,7 +8,7 @@ import { useRouter } from 'expo-router';
 const firestore = getFirestore(app);
 const auth = getAuth(app);
 
-// Define the type for an event
+
 type Event = {
   eventName: string;
   description: string;
@@ -54,7 +54,7 @@ export default function ViewEventsScreen() {
       setEvents((prevEvents) => prevEvents.filter((e) => e !== event));
       Alert.alert("Success", "Event deleted successfully!");
     } catch (error) {
-      console.error("Error deleting event:", error);
+      console.error("Error in deleting event:", error);
       Alert.alert("Error", "Could not delete event.");
     }
   };
@@ -105,13 +105,13 @@ export default function ViewEventsScreen() {
             </View>
           ))
         ) : (
-          <Text style={styles.noEventsText}>No events available.</Text>
+          <Text style={styles.noEventsText}>No events available. Booo Make an Event</Text>
         )}
       </ScrollView>
     </View>
   );
 }
-
+//Styles for front end 
 const styles = StyleSheet.create({
   container: {
     flex: 1,

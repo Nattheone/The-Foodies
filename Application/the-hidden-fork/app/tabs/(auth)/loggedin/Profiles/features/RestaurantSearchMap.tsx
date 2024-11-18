@@ -7,8 +7,10 @@ import { View, StyleSheet, Text, TextInput, TouchableOpacity, FlatList, Alert, M
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 
+//Initialization of Firestore 
 const firestore = getFirestore(app);
 
+//for Modal Information
 type Restaurant = {
   id: string;
   name: string;
@@ -21,12 +23,14 @@ type Restaurant = {
   status?: 'Busy' | 'Moderate' | 'Slow';
   events?: Event[];
 };
+//For Events in Modal
 type Event = {
   eventName: string;
   description: string;
   date: string;
   discount?: string;
 };
+//Default components for Search Function
 export default function SimpleMapScreen() {
   const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
@@ -39,16 +43,17 @@ export default function SimpleMapScreen() {
   const router = useRouter();
   const auth = getAuth(app);
 
+  //default view of the map componenet 
   const initialRegion = {
     latitude: 33.5779,
     longitude: -101.8552,
     latitudeDelta: 0.1,
     longitudeDelta: 0.1,
   };
-
+  //useEffect to fetch restaurant data and request location permissions
   useEffect(() => {
     async function loadRestaurants() {
-      // Request location permission before loading any location-based data
+     
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert("Location Permission Needed", "Please enable location permissions to view restaurant locations.");
@@ -56,7 +61,6 @@ export default function SimpleMapScreen() {
         return;
       }
       
-      // Load restaurants if permission granted
       try {
         const querySnapshot = await getDocs(collection(firestore, 'restaurants'));
         const restaurantData = await Promise.all(querySnapshot.docs.map(async (doc) => {
@@ -89,6 +93,7 @@ export default function SimpleMapScreen() {
     loadRestaurants();
   }, []);
 
+  // Geocodes a given address into latitude and longitude (NOT SURE IF THIS WORKS WILL COMEBACK TO FIX)
   async function geocodeAddress(address: string) {
     try {
       const [location] = await Location.geocodeAsync(address);
@@ -107,11 +112,13 @@ export default function SimpleMapScreen() {
     }
   }
 
+// Opens the modal with the selected restaurant info
   const openModal = (restaurant: Restaurant) => {
     setSelectedRestaurant(restaurant);
     setModalVisible(true);
   };
 
+  // Opens the selected restaurants location in Apple Maps
   const openInMaps = () => {
     if (selectedRestaurant?.latitude && selectedRestaurant?.longitude) {
       const url = `maps://?q=${selectedRestaurant.latitude},${selectedRestaurant.longitude}`;
@@ -198,7 +205,7 @@ export default function SimpleMapScreen() {
                 <Text style={styles.modalAddress}>{selectedRestaurant?.address}</Text>
               </TouchableOpacity>
 
-              {/* Hours - Display as is from the database */}
+              {/* Hours IN ORDER THIS IS FIXED NOW ALEXIS*/}
               <View style={styles.hoursContainer}>
                 {selectedRestaurant?.hours &&
                   daysOfWeek.map((day) => (
@@ -211,7 +218,7 @@ export default function SimpleMapScreen() {
 
 
 
-              {/* Mini Map */}
+              {/* Mini Mini Map tehehe */}
               {selectedRestaurant?.latitude && selectedRestaurant?.longitude && (
                 <MapView
                   style={styles.miniMap}
@@ -230,8 +237,8 @@ export default function SimpleMapScreen() {
                   />
                 </MapView>
               )}
-                            {/* Events Section */}
-                            <Text style={styles.sectionTitle}>Promotions & Events</Text>
+              {/* Events Section */}
+              <Text style={styles.sectionTitle}>Promotions & Events</Text>
               <ScrollView horizontal contentContainerStyle={styles.eventsContainer}>
                 {selectedRestaurant?.events?.length ? (
                   selectedRestaurant.events.map((event, index) => (
@@ -322,6 +329,7 @@ export default function SimpleMapScreen() {
   );
 }
 
+//Styles for front end 
 const styles = StyleSheet.create({
   container: { flex: 1,     backgroundColor: '#FFFFFF' 
   },

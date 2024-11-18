@@ -28,7 +28,6 @@ export default function CreateEventScreen() {
     }
 
     try {
-      // Reference to the user's restaurant document
       const restaurantDocRef = doc(firestore, 'restaurants', user.uid);
 
       // Add the event to the `events` array field
@@ -43,9 +42,9 @@ export default function CreateEventScreen() {
       });
 
       Alert.alert("Success", "Event created successfully!");
-      router.back(); // Navigate back after creation
+      router.back(); 
     } catch (error) {
-      console.error("Error creating event:", error);
+      console.error("Error in creating event:", error);
       Alert.alert("Error", "Could not create event.");
     }
   };
@@ -121,6 +120,7 @@ export default function CreateEventScreen() {
   );
 }
 
+//Styles for front end 
 const styles = StyleSheet.create({
   viewEventsButton: {
     backgroundColor: '#5A6B5C',
