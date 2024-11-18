@@ -8,9 +8,11 @@ import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { app } from '../../../../../firebaseConfig';
 
+//initializes firestore and storage for pictures 
 const firestore = getFirestore(app);
 const storage = getStorage(app);
 
+//default components and definitions 
 export default function CustomerSetting() {
   const router = useRouter();
   const auth = getAuth(app);
@@ -22,6 +24,7 @@ export default function CustomerSetting() {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
+  //loading screen to featch users settings 
   useEffect(() => {
     if (user) {
       loadProfileData(user.uid);
@@ -31,6 +34,7 @@ export default function CustomerSetting() {
     }
   }, [user]);
 
+ // Function to load Customer information from Firestore
   async function loadProfileData(userId: string): Promise<void> {
     try {
       const profileDoc = await getDoc(doc(firestore, 'customers', userId));
@@ -45,16 +49,17 @@ export default function CustomerSetting() {
     }
   }
 
-  // Function to resize and compress image
+  // Function to compress and make into url 
   const compressImage = async (uri: string) => {
     const compressedImage = await ImageManipulator.manipulateAsync(
       uri,
-      [{ resize: { width: 1024 } }], // Resize to max width of 1024px
-      { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG } // Compress to 70% quality
+      [{ resize: { width: 1024 } }], 
+      { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG } 
     );
     return compressedImage.uri;
   };
 
+  //image picker to allow users to select a profile pic
   const pickImage = async (): Promise<void> => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -69,6 +74,7 @@ export default function CustomerSetting() {
     }
   };
 
+  //upadates the profile image to storage and the settings in firestore for the image url
   const uploadImage = async (uri: string): Promise<void> => {
     if (!user) return;
 
@@ -94,6 +100,7 @@ export default function CustomerSetting() {
     }
   };
 
+  //for reseting password 
   async function reauthenticate(currentPassword: string): Promise<void> {
     if (!user) return;
 
@@ -101,6 +108,7 @@ export default function CustomerSetting() {
     await reauthenticateWithCredential(user, credential);
   }
 
+  //saves the settings and updates the passsword if needed
   async function saveProfileChanges(): Promise<void> {
     if (!user) {
       Alert.alert("Error", "User is not logged in.");
@@ -143,7 +151,7 @@ export default function CustomerSetting() {
     >
       <View style={styles.innerContainer}>
         <Text style={styles.title}>Edit Profile</Text>
-
+        {/* Profile Pic selection*/}
         <TouchableOpacity onPress={pickImage}>
           {profileImage ? (
             <Image source={{ uri: profileImage }} style={styles.profilePicture} />
@@ -154,6 +162,7 @@ export default function CustomerSetting() {
           )}
         </TouchableOpacity>
 
+        {/* Name Input*/}
         <Text style={styles.label}>Name</Text>
         <TextInput
           style={styles.input}
@@ -163,10 +172,11 @@ export default function CustomerSetting() {
           placeholderTextColor={"#888"}
           autoCapitalize="words"
         />
-
+        {/* Shows Users current email DOESNT NOT CHANGE IT FOR NOW  */}
         <Text style={styles.label}>Email</Text>
         <Text style={styles.nonEditableText}>{user?.email}</Text>
 
+        {/* Reset Paswword Inputs*/}
         <Text style={styles.label}>New Password</Text>
         <TextInput
           style={styles.input}
@@ -201,6 +211,7 @@ export default function CustomerSetting() {
   );
 }
 
+//Style for frontend
 const styles = StyleSheet.create({
   container: {
     flex: 1,

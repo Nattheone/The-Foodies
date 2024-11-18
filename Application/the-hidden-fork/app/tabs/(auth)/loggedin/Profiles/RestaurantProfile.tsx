@@ -6,14 +6,18 @@ import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { app } from '../../../../../firebaseConfig';
+
+//for event type
 type Event = {
   eventName: string;
   description: string;
   date: string;
   discount?: string;
 };
+//Initialization of Firestore 
 const firestore = getFirestore(app);
 
+//Restaurants default components 
 export default function RestaurantProfile() {
   const router = useRouter();
   const auth = getAuth(app);
@@ -30,12 +34,14 @@ export default function RestaurantProfile() {
   const [events, setEvents] = useState<Event[]>([]); 
   const [loading, setLoading] = useState(true);
 
+  //loads the profile for that restaurant user
   useEffect(() => {
     if (user) {
       loadProfileData(user.uid);
     }
   }, [user]);
 
+  //function to load profile information for that user with error handling 
   async function loadProfileData(userId: string) {
     try {
       const profileDoc = await getDoc(doc(firestore, 'restaurants', userId));
@@ -63,7 +69,7 @@ export default function RestaurantProfile() {
       setLoading(false);
     }
   }
-
+  //function that uses geocode to pinpoint address 
   async function geocodeAddress(address: string) {
     try {
       const [location] = await Location.geocodeAsync(address);
@@ -80,7 +86,7 @@ export default function RestaurantProfile() {
       Alert.alert('Error', 'Failed to get coordinates for the address.');
     }
   }
-
+  //function to send user to apple maps for the address
   function openMaps() {
     if (coordinates) {
       const url = `maps://?q=${coordinates.latitude},${coordinates.longitude}`;
@@ -89,7 +95,7 @@ export default function RestaurantProfile() {
       );
     }
   }
-
+//loading screen while getting information 
   if (loading) {
     return (
       <View style={styles.container}>
@@ -101,6 +107,7 @@ export default function RestaurantProfile() {
 
   return (
     <View style={styles.container}>
+      {/* Profile Pic display  */}
       <View style={styles.header}>
         {profileImage ? (
           <Image source={{ uri: profileImage }} style={styles.profilePicture} />
@@ -109,15 +116,15 @@ export default function RestaurantProfile() {
             <Text style={styles.profilePictureText}>+</Text>
           </View>
         )}
-
+        {/* Business Name display  */}
         <Text style={styles.name}>{businessName}</Text>
-
+        {/* Tags display  */}
         {(restaurantType || tags.length > 0) && (
           <Text style={styles.tags}>
             {[restaurantType, ...tags, status].filter(Boolean).join(' | ')}
           </Text>
         )}
-
+        {/* Edit button  */}
         <TouchableOpacity
           onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/RestaurantSetting')}
           style={styles.editButton}
@@ -125,7 +132,7 @@ export default function RestaurantProfile() {
           <Text style={styles.editText}>Edit</Text>
         </TouchableOpacity>
       </View>
-
+        {/* Container for Address and Hours wit Map  */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.infoCard}>
           <Text style={styles.sectionTitle}>ADDRESS & HOURS</Text>
@@ -179,7 +186,7 @@ export default function RestaurantProfile() {
           </ScrollView>
         </View>
       </ScrollView>
-
+            {/* Bottom Navigation Bar  */}
       <View style={styles.bottomNavBar}>
         <TouchableOpacity style={styles.navButton} onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/RestaurantProfile')}>
           <Text style={styles.navButtonText}>Profile</Text>
@@ -194,7 +201,7 @@ export default function RestaurantProfile() {
     </View>
   );
 }
-
+//style for the frontend
 const styles = StyleSheet.create({
   container: {
     flex: 1,

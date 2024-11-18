@@ -49,7 +49,7 @@ export default function RestaurantSetting() {
     }
   }, [user]);
 
-  // Function to load restaurant settings from Firestore
+  // Function to load restaurant info from Firestore
   async function loadSettings(userId: string) {
     try {
       const profileDoc = await getDoc(doc(firestore, 'restaurants', userId));
@@ -81,7 +81,7 @@ export default function RestaurantSetting() {
     setStatus(newStatus);
   };
 
-  //this compresses the images into a url to save into firebase storage
+  //this compresses the images into a url 
   const compressImage = async (uri: string) => {
     const compressedImage = await ImageManipulator.manipulateAsync(
       uri,
@@ -321,7 +321,7 @@ export default function RestaurantSetting() {
           placeholderTextColor={"#888"}
           secureTextEntry
         />
-
+      {/* Reset Paswword Inputs*/}
         <Text style={styles.label}>New Password</Text>
         <TextInput
           style={styles.input}
@@ -331,7 +331,7 @@ export default function RestaurantSetting() {
           placeholderTextColor={"#888"}
           secureTextEntry
         />
-
+        {/* Buttons for Save and Cancel */}
         <View style={styles.buttonsContainer}>
           <TouchableOpacity style={styles.cancelButton} onPress={cancelChanges}>
             <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -345,7 +345,7 @@ export default function RestaurantSetting() {
     </KeyboardAvoidingView>
   );
 }
-
+//Style for frontend
 const styles = StyleSheet.create({
   statusContainer: {
     flexDirection: 'row',

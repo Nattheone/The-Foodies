@@ -5,8 +5,10 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { app } from '../../../../../firebaseConfig';
 
+//Initialization of Firestore 
 const firestore = getFirestore(app);
 
+//Customer default components 
 export default function CustomerProfile() {
   const router = useRouter();
   const auth = getAuth(app);
@@ -17,12 +19,14 @@ export default function CustomerProfile() {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  //loads the profile for that Customer user
   useEffect(() => {
     if (user) {
       loadProfileData(user.uid);
     }
   }, [user]);
 
+  //function to load information for that user with error handling 
   async function loadProfileData(userId: string) {
     try {
       const profileDoc = await getDoc(doc(firestore, 'customers', userId));
@@ -40,6 +44,7 @@ export default function CustomerProfile() {
     }
   }
 
+  //loading screen while getting information 
   if (loading) {
     return (
       <View style={styles.container}>
@@ -52,6 +57,7 @@ export default function CustomerProfile() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
+      {/* Profile Pic display  */}
         {profileImage ? (
           <Image source={{ uri: profileImage }} style={styles.profilePicture} />
         ) : (
@@ -59,9 +65,9 @@ export default function CustomerProfile() {
             <Text style={styles.profilePictureText}>+</Text>
           </View>
         )}
-
+        {/* Name Display  */}
         <Text style={styles.name}>{name}</Text>
-
+        {/* Fake Following FOR NOW WILL MAKE FUNCTIONAL IF THERE IS TIME*/}
         <View style={styles.followingContainer}>
           <Text style={styles.followingCount}>{reviewCount}</Text>
           <Text style={styles.followingLabel}>Following</Text>
@@ -71,11 +77,12 @@ export default function CustomerProfile() {
           onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/CustomerSetting')} 
           style={styles.editButton}
         >
+          {/* Edit Button*/}
           <Text style={styles.editText}>Edit</Text> 
         </TouchableOpacity>
       </View>
 
-      {/* Bottom Navigation Bar */}
+      {/* Bottom Navigation Bar  */}
       <View style={styles.bottomNavBar}>
         <TouchableOpacity style={styles.navButton} onPress={() => router.push('/tabs/(auth)/loggedin/Profiles/CustomerProfile')}>
           <Text style={styles.navButtonText}>Profile</Text>
@@ -88,6 +95,7 @@ export default function CustomerProfile() {
   );
 }
 
+//style for the frontend
 const styles = StyleSheet.create({
   container: {
     flex: 1,
