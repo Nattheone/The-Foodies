@@ -331,21 +331,68 @@ export default function SimpleMapScreen() {
 
 //Styles for front end 
 const styles = StyleSheet.create({
-  container: { flex: 1,     backgroundColor: '#FFFFFF' 
+  container: { 
+  flex: 1, 
+  backgroundColor: '#FFFFFF' 
   },
-  toggleContainer: { flexDirection: 'row', justifyContent: 'center', padding: 10, backgroundColor: '#f0f0f0', },
-  toggleButton: { flex: 1, paddingVertical: 10, alignItems: 'center', backgroundColor: '#d3d3d3' },
-  activeButton: { backgroundColor: '#798B67' },
-  toggleButtonText: { fontSize: 16, color: '#000' },
-  activeButtonText: { color: '#FFFFFF', fontWeight: 'bold' },
-  searchContainer: { paddingHorizontal: 20, marginVertical: 10 },
-  searchInput: { height: 40, borderColor: '#ddd', borderWidth: 1, paddingLeft: 10, borderRadius: 8, backgroundColor: '#FFFFFF', color: '#4A4A4A', },
-  map: { width: '100%', height: '100%' },
-  listContainer: { paddingTop: 10 },
-  listItem: { padding: 15, borderBottomWidth: 1, borderBottomColor: '#ddd' },
+  toggleContainer: { 
+    flexDirection: 'row', 
+    justifyContent: 'center', 
+    padding: 10, 
+    backgroundColor: '#f0f0f0', 
+  },
+  toggleButton: {
+    flex: 1, 
+    paddingVertical: 10, 
+    alignItems: 'center', 
+    backgroundColor: '#d3d3d3' 
+  },
+  activeButton: { 
+    backgroundColor: '#798B67' 
+  },
+  toggleButtonText: { 
+    fontSize: 16, 
+    color: '#000'
+   },
+  activeButtonText: { 
+    color: '#FFFFFF', 
+    fontWeight: 'bold' 
+  },
+  searchContainer: { 
+    paddingHorizontal: 20, 
+    marginVertical: 10 },
+  searchInput: { 
+    height: 40, 
+    borderColor: '#ddd', 
+    borderWidth: 1, 
+    paddingLeft: 10, 
+    borderRadius: 8, 
+    backgroundColor: '#FFFFFF', 
+    color: '#4A4A4A', 
+  },
+  map: { 
+    width: '100%', 
+    height: '100%' 
+  },
+  listContainer: { 
+    paddingTop: 10 
+  },
+  listItem: { 
+    padding: 15, 
+    borderBottomWidth: 1, 
+    borderBottomColor: '#ddd' 
+  },
   listItemText: { fontSize: 16 },
-  noResultsText: { textAlign: 'center', fontSize: 16, color: '#999', marginTop: 20 },
-  loadingText: { textAlign: 'center', marginTop: 20, fontSize: 16 },
+  noResultsText: { 
+    textAlign: 'center', 
+    fontSize: 16, color: '#999', 
+    marginTop: 20 
+  },
+  loadingText: { 
+    textAlign: 'center', 
+    marginTop: 20, 
+    fontSize: 16 
+  },
   bottomNavBar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -358,10 +405,14 @@ const styles = StyleSheet.create({
     bottom: -50,
     width: '100%',
   },
-  navButton: { alignItems: 'center' },
-  navButtonText: { fontSize: 16, color: '#FFFFFF', fontWeight: 'bold' },
-
-  // Modal Styles
+  navButton: { 
+    alignItems: 'center'
+   },
+  navButtonText: { 
+    fontSize: 16, 
+    color: '#FFFFFF',
+     fontWeight: 'bold' 
+    },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -381,20 +432,78 @@ const styles = StyleSheet.create({
   scrollContainer: {
     alignItems: 'center',
   },
-  backButton: { alignSelf: 'flex-start', marginBottom: 10 },
-  backButtonText: { fontSize: 16, color: '#798B67' },
-  profileImage: { width: 100, height: 100, borderRadius: 50, marginBottom: 10 },
-  profileImagePlaceholder: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#ccc', justifyContent: 'center', alignItems: 'center', marginBottom: 10 },
-  profileImageText: { color: '#FFF', fontSize: 16 },
-  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
-  tags: { fontSize: 14, color: '#666', marginBottom: 10 },
-  statusText: { fontSize: 16, color: '#333', fontWeight: 'bold', marginVertical: 5 },
-  modalAddress: { fontSize: 16, color: '#4A4A4A', textAlign: 'center', marginBottom: 10 },
-  hoursContainer: { marginBottom: 10, width: '100%' },
-  hoursRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 5 },
-  day: { fontSize: 14, color: '#4A4A4A', fontWeight: 'bold' },
-  time: { fontSize: 14, color: '#4A4A4A' },
-  miniMap: { width: '100%', height: 150, borderRadius: 8, marginTop: 10 },
+  backButton: { 
+    alignSelf: 'flex-start', 
+    marginBottom: 10 
+  },
+  backButtonText: { 
+    fontSize: 16, 
+    color: '#798B67' 
+  },
+  profileImage: { 
+    width: 100, 
+    height: 100, 
+    borderRadius: 50, 
+    marginBottom: 10 
+  },
+  profileImagePlaceholder: { 
+    width: 100, 
+    height: 100, 
+    borderRadius: 50, 
+    backgroundColor: '#ccc', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    marginBottom: 10 
+  },
+  profileImageText: { 
+    color: '#FFF', 
+    fontSize: 16 },
+  modalTitle: { 
+    fontSize: 18, 
+    fontWeight: 'bold', 
+    marginBottom: 10 
+  },
+  tags: { 
+    fontSize: 14, 
+    color: '#666', 
+    marginBottom: 10 
+  },
+  statusText: { 
+    fontSize: 16, 
+    color: '#333', 
+    fontWeight: 'bold', 
+    marginVertical: 5 
+  },
+  modalAddress: { 
+    fontSize: 16, 
+    color: '#4A4A4A', 
+    textAlign: 'center', 
+    marginBottom: 10 
+  },
+  hoursContainer: { 
+    marginBottom: 10, 
+    width: '100%' 
+  },
+  hoursRow: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    paddingVertical: 5 
+  },
+  day: { 
+    fontSize: 14, 
+    color: '#4A4A4A', 
+    fontWeight: 'bold'
+   },
+  time: { 
+    fontSize: 14, 
+    color: '#4A4A4A' 
+  },
+  miniMap: { 
+    width: '100%', 
+    height: 150, 
+    borderRadius: 8, 
+    marginTop: 10 
+  },
   listItem2: {
     flexDirection: 'row',
     padding: 15,
